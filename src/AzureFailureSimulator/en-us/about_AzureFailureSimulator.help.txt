@@ -1,0 +1,11 @@
+﻿TOPIC
+	about_AzureFailureSimulator
+	
+SHORT DESCRIPTION
+	Explains how to use the AzureFailureSimulator powershell module
+	
+LONG DESCRIPTION
+	<Insert Content here>
+
+KEYWORDS
+	AzureFailureSimulator

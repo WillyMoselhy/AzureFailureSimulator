@@ -1,0 +1,62 @@
+{
+    "properties": {
+        "provisioningState": "Succeeded",
+        "steps": [
+            {
+                "name": "Step 1",
+                "branches": [
+                    {
+                        "name": "Branch 1",
+                        "actions": [
+                            {
+                                "duration": "PT10M",
+                                "parameters": [
+                                    {
+                                        "key": "abruptShutdown",
+                                        "value": "true"
+                                    }
+                                ],
+                                "selectorId": "06e39f19-8591-4cca-9294-176c23f2bac1",
+                                "type": "continuous",
+                                "name": "urn:csci:microsoft:virtualMachine:shutdown/1.0"
+                            },
+                            {
+                                "duration": "PT10M",
+                                "type": "delay",
+                                "name": "urn:csci:microsoft:chaosStudio:TimedDelay/1.0"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "selectors": [
+            {
+                "targets": [
+                    {
+                        "type": "ChaosTarget",
+                        "id": "/subscriptions/44194899-7181-423a-9dbc-278d99a7683a/resourceGroups/adcb-lab/providers/microsoft.compute/virtualmachines/dc/providers/Microsoft.Chaos/targets/microsoft-virtualmachine"
+                    }
+                ],
+                "type": "List",
+                "id": "06e39f19-8591-4cca-9294-176c23f2bac1"
+            }
+        ]
+    },
+    "name": "ShutdownVM",
+    "identity": {
+        "tenantId": "0a55126a-c532-406d-9900-a6d0300b17de",
+        "principalId": "4b0d51f1-c3e4-4713-a117-8056cb4e4515",
+        "type": "SystemAssigned"
+    },
+    "location": "uksouth",
+    "tags": {},
+    "id": "/subscriptions/44194899-7181-423a-9dbc-278d99a7683a/resourceGroups/ADCB-Lab/providers/Microsoft.Chaos/experiments/ShutdownVM",
+    "type": "Microsoft.Chaos/experiments",
+    "systemData": {
+        "createdByType": "User",
+        "createdAt": "2025-09-22T12:41:07.59+00:00",
+        "lastModifiedAt": "2025-09-22T12:41:07.59+00:00"
+    },
+    "apiVersion": "2024-01-01"
+}
