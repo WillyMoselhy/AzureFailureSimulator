@@ -50,7 +50,16 @@
                         "type": "ChaosTarget",
                         "id": "/subscriptions/44194899-7181-423a-9dbc-278d99a7683a/resourceGroups/vmss-demo/providers/microsoft.compute/virtualmachinescalesets/vmss-demo-01"
                     }
-                ]
+                ],
+                "filter": {
+                    "parameters": {
+                        "zones": [
+                            "1",
+                            "2"
+                        ]
+                    },
+                    "type": "Simple"
+                }
             },
             {
                 "id": "Selector1",
