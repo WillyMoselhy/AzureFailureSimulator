@@ -40,6 +40,9 @@ function Invoke-AzureFailureExperiment {
                 if ($actionDefinition.SupportsDuration) {
                     $paramInvokeAzureFailureAction["Duration"] = $action.Duration
                 }
+                if($actionDefinition.SupportsFilter -and $script:Selectors[$action.selectorId].Filter){
+                    $paramInvokeAzureFailureAction["Filter"] = $script:Selectors[$action.selectorId].Filter
+                }
                 Write-PSFMessage -Level Verbose -Message "Invoking Action Command: $($actionDefinition.Command) with parameters: $($paramInvokeAzureFailureAction | Out-String)"
                 & $actionDefinition.Command @paramInvokeAzureFailureAction
             }

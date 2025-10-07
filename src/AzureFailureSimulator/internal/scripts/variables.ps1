@@ -4,6 +4,7 @@ $script:Selectors = @{}
 
 $script:TargetTypes = @(
     "Microsoft.Compute/virtualMachines"
+    "Microsoft.Compute/virtualMachineScaleSets"
 )
 
 $script:Steps = @()
@@ -21,11 +22,20 @@ $script:ActionList = @{
         Command          = "Invoke-AzureFailureVMShutdown"
         RestoreCommand   = "Restore-AzureFailureVMShutdown"
     }
+    "urn:csci:microsoft:virtualMachineScaleSet:shutdown/2.0" = @{
+        TargetType       = "Microsoft.Compute/virtualMachineScaleSets"
+        Parameters       = @(
+            @{ Name = "abruptShutdown"; Type = "bool"; Required = $false }
+        )
+        SupportsDuration = $true
+        SupportsFilter   = $true
+        Command          = "Invoke-AzureFailureVMScaleSetShutdown"
+        RestoreCommand   = "Restore-AzureFailureVMScaleSetShutdown"
+    }
     "urn:csci:microsoft:chaosStudio:timedDelay/1.0"  = @{
         TargetType       = "delay"
         Parameters       = @()
         SupportsDuration = $true
         Command          = "Invoke-AzureFailureDelay"
-
     }
 }

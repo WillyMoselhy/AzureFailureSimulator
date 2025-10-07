@@ -1,19 +1,24 @@
 function Register-AzureFailureSelector {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory = $true, Position = 0,ValueFromPipelineByPropertyName=$true)]
+        [Parameter(Mandatory = $true, Position = 0, ValueFromPipelineByPropertyName = $true)]
         [string] $Id,
 
-        [Parameter(Mandatory = $true, ParameterSetName = "Query", Position = 2,ValueFromPipelineByPropertyName=$true)]
+        [Parameter(Mandatory = $true, ParameterSetName = "Query", Position = 2, ValueFromPipelineByPropertyName = $true)]
         [string] $QueryString,
 
         #Parameter to accept array of subscription Ids. Parameter name is plural to align with Chaos studio inputs.
-        [Parameter(Mandatory = $true, ParameterSetName = "Query", Position = 3,ValueFromPipelineByPropertyName=$true)]
+        [Parameter(Mandatory = $true, ParameterSetName = "Query", Position = 3, ValueFromPipelineByPropertyName = $true)]
         [string[]] $SubscriptionIds,
 
         #Parameter to accept list of resource Ids. Parameter name is plural to align with Chaos studio inputs.
         [Parameter(Mandatory = $true, ParameterSetName = "List", Position = 2, ValueFromPipelineByPropertyName = $true)]
-        [PSCustomObject[]] $Targets
+        [PSCustomObject[]] $Targets,
+
+        #Parameter to accept filter hashtable for VMSS. This will be used only when the target type is VMSS.
+        [Parameter(Mandatory = $false, ParameterSetName = "List", Position = 3, ValueFromPipelineByPropertyName = $true)]
+        [PSCustomObject] $filter
+
     )
     process {
 
@@ -63,9 +68,31 @@ function Register-AzureFailureSelector {
             throw "Selector Id: $($Id) - All target resources must be of the same type."
         }
 
+        # Register filter for VMScaleSets
+        if($filter){
+            Write-PSFMessage -Level Verbose -Message "Validating filter for selector Id: $($Id)"
+            if($targetObjects[0].Type -ne "Microsoft.Compute/virtualMachineScaleSets"){
+                throw "Selector Id: $($Id) - Filter can only be applied when the target type is 'Microsoft.Compute/virtualMachineScaleSets'."
+            }
+            if(-not $filter.parameters.zones){
+                throw "Selector Id: $($Id) - Filter must have a 'parameters.zones' key."
+            }
+            $filterZones = $filter.parameters.zones
+            Write-PSFMessage -Level Verbose -Message "Selector Id: $($Id) - Applying filter zones: $($filterZones -join ", ")"
+        }
+        elseif($targetObjects[0].Type -eq "Microsoft.Compute/virtualMachineScaleSets"){
+            Write-PSFMessage -Level Warning -Message "Selector Id: $($Id) - No filter applied for VMScaleSet. All instances in the scale set will be targeted."
+            $filterZones = $null
+        }
+        else{
+            $filterZones = $null
+        }
+
+
         # TODO: Add logic for the Query parameter set
         $script:Selectors[$Id] = [PSCustomObject]@{
             Targets = $targetObjects
+            Filter = $filterZones
         }
     }
 

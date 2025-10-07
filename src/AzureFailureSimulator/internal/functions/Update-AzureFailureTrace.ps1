@@ -7,6 +7,9 @@ function Update-AzureFailureTrace {
         [Parameter(Mandatory = $true)]
         [string] $ResourceId,
 
+        [Parameter(Mandatory = $false)]
+        [hashtable] $TargetDetails,
+
         [Parameter(Mandatory = $true)]
         [string] $Step,
 
@@ -15,6 +18,12 @@ function Update-AzureFailureTrace {
 
         [Parameter(Mandatory = $true)]
         [string] $Action,
+
+        [Parameter(Mandatory = $false)]
+        [bool] $ActionSkipped,
+
+        [Parameter(Mandatory = $false)]
+        [string] $ActionSkipMessage,
 
         [Parameter(Mandatory = $false)]
         [DateTime] $ActionTriggerTime,
@@ -28,7 +37,6 @@ function Update-AzureFailureTrace {
         [Parameter(Mandatory = $false)]
         [DateTime] $ActionRestoreCompleteTime
 
-
     )
     # Find if an entry exist for the current ResourceId, Step, Branch, Action
     $existingEntry = $script:tracerOutput | Where-Object {
@@ -38,25 +46,25 @@ function Update-AzureFailureTrace {
         $_.Action -eq $Action
     }
     if ($existingEntry) {
-        if($ActionTriggerTime){
+        if ($ActionTriggerTime) {
             $existingEntry.ActionTriggerTime = $ActionTriggerTime
         }
-        if($ActionCompleteTime){
+        if ($ActionCompleteTime) {
             $existingEntry.ActionCompleteTime = $ActionCompleteTime
-            if($existingEntry.ActionTriggerTime){
+            if ($existingEntry.ActionTriggerTime) {
                 $existingEntry.ActionDuration = $ActionCompleteTime - $existingEntry.ActionTriggerTime
             }
         }
-        if($ActionRestoreTriggerTime){
+        if ($ActionRestoreTriggerTime) {
             $existingEntry.ActionRestoreTriggerTime = $ActionRestoreTriggerTime
         }
-        if($ActionRestoreCompleteTime){
+        if ($ActionRestoreCompleteTime) {
             $existingEntry.ActionRestoreCompleteTime = $ActionRestoreCompleteTime
-            if($existingEntry.ActionRestoreTriggerTime){
+            if ($existingEntry.ActionRestoreTriggerTime) {
                 $existingEntry.ActionRestoreDuration = $ActionRestoreCompleteTime - $existingEntry.ActionRestoreTriggerTime
             }
         }
-        if($existingEntry.ActionCompleteTime -and $existingEntry.ActionRestoreCompleteTime){
+        if ($existingEntry.ActionCompleteTime -and $existingEntry.ActionRestoreCompleteTime) {
             $existingEntry.DowntimeDuration = $existingEntry.ActionRestoreCompleteTime - $existingEntry.ActionCompleteTime
         }
         # Update the existing entry
@@ -67,7 +75,11 @@ function Update-AzureFailureTrace {
             ResourceId                = $ResourceId
             Step                      = $Step
             Branch                    = $Branch
+            TargetDetails             = $TargetDetails
+            TargetDetailsJson         = if ($TargetDetails) { $TargetDetails | ConvertTo-Json -Compress -Depth 3 } else { $null }
             Action                    = $Action
+            ActionSkipped             = $ActionSkipped
+            ActionSkipMessage         = $ActionSkipMessage
             ActionTriggerTime         = if ($ActionTriggerTime) { $ActionTriggerTime }         else { $null }
             ActionCompleteTime        = if ($ActionCompleteTime) { $ActionCompleteTime }        else { $null }
             ActionDuration            = $null
@@ -78,19 +90,20 @@ function Update-AzureFailureTrace {
 
             DowntimeDuration          = $null
         }
-        if($newEntry.ActionCompleteTime -and $newEntry.ActionTriggerTime){
+        if ($newEntry.ActionCompleteTime -and $newEntry.ActionTriggerTime) {
             $newEntry.ActionDuration = $newEntry.ActionCompleteTime - $newEntry.ActionTriggerTime
         }
-        if($newEntry.ActionRestoreCompleteTime -and $newEntry.ActionRestoreTriggerTime){
+        if ($newEntry.ActionRestoreCompleteTime -and $newEntry.ActionRestoreTriggerTime) {
             $newEntry.ActionRestoreDuration = $newEntry.ActionRestoreCompleteTime - $newEntry.ActionRestoreTriggerTime
         }
-        if($newEntry.ActionCompleteTime -and $newEntry.ActionRestoreCompleteTime){
+        if ($newEntry.ActionCompleteTime -and $newEntry.ActionRestoreCompleteTime) {
             $newEntry.DowntimeDuration = $newEntry.ActionRestoreCompleteTime - $newEntry.ActionCompleteTime
         }
         $script:tracerOutput += $newEntry
     }
 
     if ($TraceOutputPath) {
-        $script:tracerOutput | Export-Csv -Path $TraceOutputPath
+        Write-PSFMessage -Level Verbose -Message "Exporting trace output to $TraceOutputPath"
+        $script:tracerOutput | Select-Object -ExcludeProperty TargetDetails| Export-Csv -Path $TraceOutputPath
     }
 }

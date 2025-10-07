@@ -24,17 +24,17 @@
                                 "type": "delay",
                                 "name": "urn:csci:microsoft:chaosStudio:TimedDelay/1.0"
                             },
-                            {
-                                "duration": "PT5S",
+ {
+                                "name": "urn:csci:microsoft:virtualMachineScaleSet:shutdown/2.0",
+                                "type": "continuous",
+                                "selectorId": "VMSSSelector",
+                                "duration": "PT2M",
                                 "parameters": [
                                     {
                                         "key": "abruptShutdown",
-                                        "value": "true"
+                                        "value": "false"
                                     }
-                                ],
-                                "selectorId": "Selector2",
-                                "type": "continuous",
-                                "name": "urn:csci:microsoft:virtualMachine:shutdown/1.0"
+                                ]
                             }
                         ]
                     }
@@ -43,14 +43,26 @@
         ],
         "selectors": [
             {
+                "id": "VMSSSelector",
+                "type": "List",
+                "targets": [
+                    {
+                        "type": "ChaosTarget",
+                        "id": "/subscriptions/44194899-7181-423a-9dbc-278d99a7683a/resourceGroups/vmss-demo/providers/microsoft.compute/virtualmachinescalesets/vmss-demo-01"
+                    }
+                ]
+            },
+            {
                 "id": "Selector1",
                 "type": "List",
                 "targets": [
                     {
-                        "id": "/subscriptions/44194899-7181-423a-9dbc-278d99a7683a/resourceGroups/adcb-lab/providers/microsoft.compute/virtualMachines/dc"
+                        "id": "/subscriptions/44194899-7181-423a-9dbc-278d99a7683a/resourceGroups/adcb-lab/providers/microsoft.compute/virtualMachines/dc",
+                        "type": "ChaosTarget"
                     },
                     {
-                        "id": "/subscriptions/44194899-7181-423a-9dbc-278d99a7683a/resourceGroups/ADCB-Lab/providers/Microsoft.Compute/virtualMachines/hyper-v"
+                        "id": "/subscriptions/44194899-7181-423a-9dbc-278d99a7683a/resourceGroups/ADCB-Lab/providers/Microsoft.Compute/virtualMachines/hyper-v",
+                        "type": "ChaosTarget"
                     }
                 ]
             },
@@ -59,7 +71,8 @@
                 "type": "List",
                 "targets": [
                     {
-                        "id": "/subscriptions/44194899-7181-423a-9dbc-278d99a7683a/resourceGroups/rg-AVD-OnPRemLabs-01/providers/Microsoft.Compute/virtualMachines/onpremlab-1"
+                        "id": "/subscriptions/44194899-7181-423a-9dbc-278d99a7683a/resourceGroups/rg-AVD-OnPRemLabs-01/providers/Microsoft.Compute/virtualMachines/onpremlab-1" ,
+                        "type": "ChaosTarget"
                     }
                 ]
             },

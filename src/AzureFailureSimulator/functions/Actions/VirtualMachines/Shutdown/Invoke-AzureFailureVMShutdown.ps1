@@ -23,30 +23,45 @@ function Invoke-AzureFailureVMShutdown {
     foreach ($target in $TargetResourceId) {
         Write-PSFMessage -Level Verbose -Message "Shutting down VM: $target"
 
-        $actionJobs += Stop-AzVM -Id $target -Force:$AbruptShutdown -AsJob
+        $vmStatus = Get-AzVM -ResourceId $target -Status
+        if ( $vmStatus.Statuses[1].Code -eq "PowerState/running") {
+            $actionJobs += Stop-AzVM -Id $target -Force:$AbruptShutdown -AsJob
+            $actionSkipped = $false
+        }
+        else {
+            Write-PSFMessage -Level Warning -Message "Step ($Step), Branch ($Branch), Target ($target): VM is not in 'running' state. Current state: $($vmStatus.Statuses[1].DisplayStatus). Skipping shutdown."
+            $actionsJobs += $false
+            $actionSkipped = $true
+            $actionSkipMessage = 'VM is not in running state'
+        }
 
         $paramUpdateAzureFailureTrace = @{
             ResourceId        = $target
             Step              = $Step
             Branch            = $Branch
             Action            = "urn:csci:microsoft:virtualMachine:shutdown/1.0"
+            ActionSkipped     = $actionSkipped
+            ActionSkipMessage = $actionSkipMessage
             ActionTriggerTime = Get-Date
         }
         Update-AzureFailureTrace @paramUpdateAzureFailureTrace
     }
-    Write-PSFMessage -Level Verbose -Message "Waiting for VM shutdown jobs to complete"
+    if ($actionJobs | Where-Object { $_ -ne $false })  {
 
-    $null = Wait-Job -Job $actionJobs
+        Write-PSFMessage -Level Verbose -Message "Waiting for VM shutdown jobs to complete"
 
-    Write-PSFMessage -Level Verbose -Message "VM shutdown jobs complete"
+        $null = Wait-Job -Job $actionJobs
 
+        Write-PSFMessage -Level Verbose -Message "VM shutdown jobs complete"
+    }
     for ($i = 0; $i -lt $TargetResourceId.Count; $i++) {
+        $actionCompleteTime = if ($actionJobs[$i]) { ($actionJobs[$i] | Receive-Job).EndTime } else { Get-Date }
         $paramUpdateAzureFailureTrace = @{
             ResourceId         = $TargetResourceId[$i]
             Step               = $Step
             Branch             = $Branch
             Action             = "urn:csci:microsoft:virtualMachine:shutdown/1.0"
-            ActionCompleteTime = ($actionJobs[$i] | Receive-Job).EndTime
+            ActionCompleteTime = $actionCompleteTime
         }
         Update-AzureFailureTrace @paramUpdateAzureFailureTrace
     }
