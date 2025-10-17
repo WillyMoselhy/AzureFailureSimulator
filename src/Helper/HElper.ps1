@@ -39,13 +39,22 @@ $target = '/subscriptions/44194899-7181-423a-9dbc-278d99a7683a/resourceGroups/AD
 Set-AzContext -SubscriptionId 'Labs'
 
 
+Reset-AzRedisCache -ResourceGroupName "vmss-demo" -Name "azurefailure" -RebootType "PrimaryNode" -Force -ShardId 0
+
+$redis = (Get-AzRedisCache -ResourceGroupName "vmss-demo" -Name "azurefailure" -)
+
+get-azrediscache
+
+(Get-AzResource -ResourceGroupName "vmss-demo"  -Name "azurefailure" -ResourceType "Microsoft.Cache/Redis" -WarningAction SilentlyContinue).properties.Instances
+
+
 $strings = (Get-ChildItem -Path .\src\AzureFailureSimulator\functions -Recurse -Filter *.ps1).BaseName | sort
 Update-PSFModuleManifest -Path .\src\AzureFailureSimulator\AzureFailureSimulator.psd1 -FunctionsToExport $strings
 remove-module AzureFailureSimulator -Force ; import-module .\src\AzureFailureSimulator
 
 
 
-Import-AzureFailureExperiment -Path .\src\Helper\Simulation01.jsonc -verbose
+Import-AzureFailureExperiment -Path .\src\Helper\Simulation01-PosgreSQL-Redis.jsonc -verbose
 
 Invoke-AzureFailureExperiment -Verbose -LogFolderPath "C:\temp\SimulatorLogs" -TraceOutputPath "C:\temp\SimulatorLogs\tracerOutput01.csv"
 

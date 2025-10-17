@@ -1,0 +1,103 @@
+{
+    "properties": {
+        "steps": [
+            {
+                "name": "Step 1",
+                "branches": [
+                    {
+                        "name": "Branch 1",
+                        "actions": [
+                            {
+                                "type": "discrete",
+                                "name": "urn:csci:microsoft:azureClusteredCacheForRedis:reboot/1.0",
+                                "parameters": [
+                                    {
+                                        "key": "RebootType",
+                                        "value": "AllNodes"
+                                    },
+                                    {
+                                        "key": "ShardId",
+                                        "value": "0"
+                                    }
+                                ],
+                                "selectorId": "RedisCache"
+                            },
+                            {
+                                "name": "urn:csci:microsoft:DBforPostgreSLFlexibleServers:failover/1.0",
+                                "type": "continuous",
+                                "selectorId": "PostgreSQLSelector",
+                                "duration": "PT2M",
+                                "parameters": [
+                                    {
+                                        "key": "ForcedFailover",
+                                        "value": false
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "selectors": [
+            {
+                "id": "PostgreSQLSelector",
+                "type": "List",
+                "targets": [
+                    {
+                        "type": "ChaosTarget",
+                        "id": "/subscriptions/44194899-7181-423a-9dbc-278d99a7683a/resourceGroups/vmss-demo/providers/Microsoft.DBforPostgreSQL/flexibleServers/azurefailure"
+                    }
+                ],
+                "filter": {
+                    "parameters": {
+                        "zones": [
+                            "2",
+                            "1"
+                        ]
+                    },
+                    "type": "Simple"
+                }
+            },
+            {
+                "id": "RedisCache",
+                "type": "List",
+                "targets": [
+                    {
+                        "id": "/subscriptions/44194899-7181-423a-9dbc-278d99a7683a/resourceGroups/vmss-demo/providers/Microsoft.Cache/Redis/azurefailure",
+                        "type": "ChaosTarget"
+                    }
+                ]
+            },
+            {
+                "id": "Selector2",
+                "type": "List",
+                "targets": [
+                    {
+                        "id": "/subscriptions/44194899-7181-423a-9dbc-278d99a7683a/resourceGroups/rg-AVD-OnPRemLabs-01/providers/Microsoft.Compute/virtualMachines/onpremlab-1",
+                        "type": "ChaosTarget"
+                    }
+                ]
+            },
+            {
+                "queryString": "Resources\r\n| project id",
+                "subscriptionIds": [
+                    "11e1f71a-1888-4e5a-8586-cea00d6b8d5b",
+                    "44194899-7181-423a-9dbc-278d99a7683a",
+                    "6758aaa2-a1ba-4523-a429-f2f6c3c0809f",
+                    "8626f0ed-cf8c-443a-be84-99509db52612",
+                    "ea97ac4f-b0fc-4c49-abb0-3169398e6ee7",
+                    "e4871581-b0aa-4d50-beb2-8be2737771ba",
+                    "8dbdabc5-2735-473f-805a-381e05dcdca7",
+                    "81f1193f-4124-49f4-84ed-edfc769a59fc",
+                    "bc113f32-7b67-4ef1-a488-ba8fa8e02672",
+                    "717bfbb1-17b6-4cd2-add0-c7ddbd37b2ca"
+                ],
+                "type": "Query",
+                "id": "d45d9ecf-8d7a-4f19-be18-f8da7bd39663"
+            }
+        ]
+    },
+    "name": "ShutdownVM",
+    "apiVersion": "2025-09-22"
+}

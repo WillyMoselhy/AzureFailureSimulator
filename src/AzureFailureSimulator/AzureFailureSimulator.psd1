@@ -46,13 +46,18 @@
     'Get-AzureFailureStep'
     'Get-AzureFailureTrace'
     'Import-AzureFailureExperiment'
+    'Invoke-AzureFailureCacheForRedisReboot'
     'Invoke-AzureFailureDelay'
     'Invoke-AzureFailureExperiment'
+    'Invoke-AzureFailurePostgreSQLFlexibleServerFailover'
+    'Invoke-AzureFailureVMScaleSetShutdown'
     'Invoke-AzureFailureVMShutdown'
     'Register-AzureFailureBranch'
     'Register-AzureFailureSelector'
     'Register-AzureFailureStep'
     'Restore-AzureFailureExperiment'
+    'Restore-AzureFailurePostgreSQLFlexibleServerFailover'
+    'Restore-AzureFailureVMScaleSetShutdown'
     'Restore-AzureFailureVMShutdown'
 )
 
@@ -96,4 +101,8 @@
 
     } # End of PrivateData hashtable
 }
+
+
+
+
 

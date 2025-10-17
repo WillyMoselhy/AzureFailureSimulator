@@ -5,6 +5,8 @@ $script:Selectors = @{}
 $script:TargetTypes = @(
     "Microsoft.Compute/virtualMachines"
     "Microsoft.Compute/virtualMachineScaleSets"
+    "Microsoft.DBforPostgreSQL/flexibleServers"
+    "Microsoft.Cache/Redis"
 )
 
 $script:Steps = @()
@@ -31,6 +33,26 @@ $script:ActionList = @{
         SupportsFilter   = $true
         Command          = "Invoke-AzureFailureVMScaleSetShutdown"
         RestoreCommand   = "Restore-AzureFailureVMScaleSetShutdown"
+    }
+    "urn:csci:microsoft:DBforPostgreSLFlexibleServers:failover/1.0" = @{
+        TargetType       = "Microsoft.DBforPostgreSQL/flexibleServers"
+        Parameters       = @(
+            @{ Name = "ForcedFailover"; Type = "bool"; Required = $false }
+        )
+        SupportsDuration = $true
+        SupportsFilter   = $true
+        Command          = "Invoke-AzureFailurePostgreSQLFlexibleServerFailover"
+        RestoreCommand   = "Restore-AzureFailurePostgreSQLFlexibleServerFailover"
+    }
+    "urn:csci:microsoft:azureClusteredCacheForRedis:reboot/1.0" = @{
+        TargetType       = "Microsoft.Cache/Redis"
+        Parameters       = @(
+            @{ Name = "RebootType"; Type = "string"; Required = $true } #TODO: Add ValidateSet
+            @{ Name = "ShardId"; Type = "string"; Required = $false }
+        )
+        SupportsDuration = $false
+        SupportsFilter   = $false
+        Command          = "Invoke-AzureFailureCacheForRedisReboot"
     }
     "urn:csci:microsoft:chaosStudio:timedDelay/1.0"  = @{
         TargetType       = "delay"

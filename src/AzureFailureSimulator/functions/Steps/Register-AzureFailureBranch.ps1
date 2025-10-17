@@ -36,7 +36,7 @@ function Register-AzureFailureBranch {
             }
 
             switch ($action.type) {
-                "continuous" {
+                {"continuous" -or "discrete"} {
                     # Validate Selectors
                     if (-not $script:Selectors[$action.selectorId]) {
                         throw "Step ($($StepName)) - Branch ($($Name)) - Action ($($action.name)): SelectorId ($($action.selectorId)) is not registered."
@@ -81,7 +81,7 @@ function Register-AzureFailureBranch {
                     }
                 }
                 default {
-                    throw "Step ($($StepName)) - Branch ($($Name)) - Action ($($action.name)): Type ($($action.type)) is not supported. Supported types are 'continuous' and 'delay'."
+                    throw "Step ($($StepName)) - Branch ($($Name)) - Action ($($action.name)): Type ($($action.type)) is not supported. Supported types are 'continuous', 'discrete', and 'delay'."
                 }
             }
 
