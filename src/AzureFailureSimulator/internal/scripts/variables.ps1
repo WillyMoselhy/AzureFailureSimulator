@@ -7,6 +7,7 @@ $script:TargetTypes = @(
     "Microsoft.Compute/virtualMachineScaleSets"
     "Microsoft.DBforPostgreSQL/flexibleServers"
     "Microsoft.Cache/Redis"
+    "Microsoft.ContainerService/managedClusters"
 )
 
 $script:Steps = @()
@@ -33,6 +34,16 @@ $script:ActionList = @{
         SupportsFilter   = $true
         Command          = "Invoke-AzureFailureVMScaleSetShutdown"
         RestoreCommand   = "Restore-AzureFailureVMScaleSetShutdown"
+    }
+    "urn:csci:microsoft:AKS:shutdown/1.0" = @{
+        TargetType       = "Microsoft.ContainerService/managedClusters"
+        Parameters       = @(
+            @{ Name = "abruptShutdown"; Type = "bool"; Required = $false }
+        )
+        SupportsDuration = $true
+        SupportsFilter   = $true
+        Command          = "Invoke-AzureFailureAKSShutdown"
+        RestoreCommand   = "Restore-AzureFailureAKSShutdown"
     }
     "urn:csci:microsoft:DBforPostgreSLFlexibleServers:failover/1.0" = @{
         TargetType       = "Microsoft.DBforPostgreSQL/flexibleServers"

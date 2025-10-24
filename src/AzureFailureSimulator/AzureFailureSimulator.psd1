@@ -46,6 +46,7 @@
     'Get-AzureFailureStep'
     'Get-AzureFailureTrace'
     'Import-AzureFailureExperiment'
+    'Invoke-AzureFailureAKSShutdown'
     'Invoke-AzureFailureCacheForRedisReboot'
     'Invoke-AzureFailureDelay'
     'Invoke-AzureFailureExperiment'
@@ -55,6 +56,7 @@
     'Register-AzureFailureBranch'
     'Register-AzureFailureSelector'
     'Register-AzureFailureStep'
+    'Restore-AzureFailureAKSShutdown'
     'Restore-AzureFailureExperiment'
     'Restore-AzureFailurePostgreSQLFlexibleServerFailover'
     'Restore-AzureFailureVMScaleSetShutdown'
@@ -101,6 +103,9 @@
 
     } # End of PrivateData hashtable
 }
+
+
+
 
 
 

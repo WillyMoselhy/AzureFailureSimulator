@@ -1,0 +1,50 @@
+{
+    "properties": {
+        "steps": [
+            {
+                "name": "Step 1",
+                "branches": [
+                    {
+                        "name": "Branch 1",
+                        "actions": [
+                            {
+                                "name": "urn:csci:microsoft:AKS:shutdown/1.0",
+                                "type": "continuous",
+                                "selectorId": "AKSSelector",
+                                "duration": "PT2M",
+                                "parameters": [
+                                    {
+                                        "key": "abruptShutdown",
+                                        "value": true
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "selectors": [
+            {
+                "id": "AKSSelector",
+                "type": "List",
+                "targets": [
+                    {
+                        "type": "ChaosTarget",
+                        "id": "/subscriptions/44194899-7181-423a-9dbc-278d99a7683a/resourceGroups/vmss-demo/providers/Microsoft.ContainerService/managedClusters/aks-azurefailure"
+                    }
+                ],
+                "filter": {
+                    "parameters": {
+                        "zones": [
+                            "1"
+                        ]
+                    },
+                    "type": "Simple"
+                }
+            }
+        ]
+    },
+    "name": "ShutdownVM",
+    "apiVersion": "2025-09-22"
+}

@@ -12,9 +12,10 @@ function Restore-AzureFailureVMScaleSetShutdown {
 
         # These might not be used but added for consistency.
         [string] $Duration,
-        [bool] $AbruptShutdown = $false
+        [bool] $AbruptShutdown = $false,
+
+        [string] $ActionName = "urn:csci:microsoft:virtualMachineScaleSet:shutdown/2.0"
     )
-    $actionName = "urn:csci:microsoft:virtualMachineScaleSet:shutdown/2.0"
 
     Write-PSFMessage -Level Verbose -Message "Step ($Step), Branch ($Branch), Target(s) ($($TargetResourceId -join ', ')): Starting VM Scale Set Instances"
 
@@ -24,7 +25,7 @@ function Restore-AzureFailureVMScaleSetShutdown {
             $_.ResourceId -eq $target -and
             $_.Step -eq $Step -and
             $_.Branch -eq $Branch -and
-            $_.Action -eq  $actionName
+            $_.Action -eq  $ActionName
         }
 
         if ($targetTrace.ActionSkipped) {
@@ -43,7 +44,7 @@ function Restore-AzureFailureVMScaleSetShutdown {
             ResourceId               = $target
             Step                     = $Step
             Branch                   = $Branch
-            Action                   = $actionName
+            Action                   = $ActionName
             ActionRestoreTriggerTime = Get-Date
         }
         Update-AzureFailureTrace @paramUpdateAzureFailureTrace
@@ -51,7 +52,7 @@ function Restore-AzureFailureVMScaleSetShutdown {
     }
     if ($actionJobs | Where-Object { $_ -ne $false }) {
         Write-PSFMessage -Level Verbose -Message "Waiting for VM Scale Set start jobs to complete"
-        $null = Wait-Job -Job $actionJobs
+        $null = Wait-Job -Job ($actionJobs | Where-Object { $_ -ne $false })
         Write-PSFMessage -Level Verbose -Message "VM Scale Set start jobs complete"
     }
     for ($i = 0; $i -lt $TargetResourceId.Count; $i++) {
@@ -60,8 +61,8 @@ function Restore-AzureFailureVMScaleSetShutdown {
                 ResourceId                = $TargetResourceId[$i]
                 Step                      = $Step
                 Branch                    = $Branch
-                Action                    =  $actionName
-                ActionRestoreCompleteTime = ($actionJobs[$i] | Receive-Job).EndTime
+                Action                    =  $ActionName
+                ActionRestoreCompleteTime = ($actionJobs[$i].PSEndTime )
             }
             Update-AzureFailureTrace @paramUpdateAzureFailureTrace
         }

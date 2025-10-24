@@ -12,11 +12,16 @@ function Invoke-AzureFailureVMScaleSetShutdown {
 
         [string] $Duration,
         [string[]] $Filter,
-        [bool] $AbruptShutdown = $false
+        [bool] $AbruptShutdown = $false,
+
+        [string] $ActionName = "urn:csci:microsoft:virtualMachineScaleSet:shutdown/2.0"
     )
     if ($AbruptShutdown) {
         Write-PSFMessage -Level Warning -Message "Abrupt Shutdown enabled. This may cause data loss or corruption on the target VM(s)."
     }
+
+
+
     $actionJobs = @()
     foreach ($target in $TargetResourceId) {
         Write-PSFMessage -Level Verbose -Message "Step ($Step) - Branch ($Branch) - Target ($target): Getting VMSS instances"
@@ -35,6 +40,7 @@ function Invoke-AzureFailureVMScaleSetShutdown {
             $actionJobs += $vmSS | Stop-AzVmss -InstanceId $vmSSInstances.InstanceId -Force:$true -SkipShutdown:$AbruptShutdown -StayProvisioned -AsJob
 
             $actionSkipped = $false
+            $actionSkipMessage = ''
         }
         else {
             Write-PSFMessage -Level Warning -Message "Step ($Step) - Branch ($Branch) - Target ($target): No running instances found in VMSS to stop"
@@ -54,7 +60,7 @@ function Invoke-AzureFailureVMScaleSetShutdown {
                 }
             }
             else { $null }
-            Action            = "urn:csci:microsoft:virtualMachineScaleSet:shutdown/2.0"
+            Action            = $actionName
             ActionSkipped     = $actionSkipped
             ActionSkipMessage = $actionSkipMessage
             ActionTriggerTime = Get-Date
@@ -64,7 +70,7 @@ function Invoke-AzureFailureVMScaleSetShutdown {
 
     if ($actionJobs | Where-Object { $_ -ne $false }) {
         Write-PSFMessage -Level Verbose -Message "Waiting for VM Scale Set shutdown jobs to complete"
-        $null = Wait-Job -Job $actionJobs
+        $null = Wait-Job -Job ($actionJobs | Where-Object { $_ -ne $false })
         Write-PSFMessage -Level Verbose -Message "VM Scale Set shutdown jobs complete"
     }
 
@@ -74,7 +80,7 @@ function Invoke-AzureFailureVMScaleSetShutdown {
             ResourceId         = $TargetResourceId[$i]
             Step               = $Step
             Branch             = $Branch
-            Action             = "urn:csci:microsoft:virtualMachineScaleSet:shutdown/2.0"
+            Action             = $actionName
             ActionCompleteTime = $actionCompleteTime
         }
         Update-AzureFailureTrace @paramUpdateAzureFailureTrace
