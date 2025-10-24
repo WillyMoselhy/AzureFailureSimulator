@@ -1,0 +1,94 @@
+{
+    "properties": {
+        "steps": [
+            {
+                "name": "Step 1",
+                "branches": [
+                    {
+                        "name": "Branch 1",
+                        "actions": [
+                            {
+                                "type": "discrete",
+                                "name": "urn:csci:microsoft:azureClusteredCacheForRedis:reboot/1.0",
+                                "parameters": [
+                                    {
+                                        "key": "RebootType",
+                                        "value": "AllNodes"
+                                    },
+                                    {
+                                        "key": "ShardId",
+                                        "value": "0"
+                                    }
+                                ],
+                                "selectorId": "RedisCache"
+                            },
+                            {
+                                "name": "urn:csci:microsoft:DBforPostgreSLFlexibleServers:failover/1.0",
+                                "type": "continuous",
+                                "selectorId": "PostgreSQLSelector",
+                                "duration": "PT2M",
+                                "parameters": [
+                                    {
+                                        "key": "ForcedFailover",
+                                        "value": false
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "selectors": [
+            {
+                "id": "PostgreSQLSelector",
+                "type": "List",
+                "targets": [
+                    {
+                        "type": "ChaosTarget",
+                        "id": "/subscriptions/f4979986-a78a-426c-b18d-dce284670a5d/resourceGroups/tammrg01/providers/Microsoft.DBforPostgreSQL/flexibleServers/pgflexsazzouz01"
+                    }
+                ],
+                "filter": {
+                    "parameters": {
+                        "zones": [
+                            "2",
+                            "1"
+                        ]
+                    },
+                    "type": "Simple"
+                }
+            },
+            {
+                "id": "RedisCache",
+                "type": "List",
+                "targets": [
+                    {
+                        "id": "/subscriptions/4f4979986-a78a-426c-b18d-dce284670a5d/resourceGroups/tammrg01/providers/Microsoft.Cache/Redis/redissazzouz01",
+                        "type": "ChaosTarget"
+                    }
+                ]
+            },
+            {
+                "id": "Selector2",
+                "type": "List",
+                "targets": [
+                    {
+                        "id": "/subscriptions/44194899-7181-423a-9dbc-278d99a7683a/resourceGroups/rg-AVD-OnPRemLabs-01/providers/Microsoft.Compute/virtualMachines/onpremlab-1",
+                        "type": "ChaosTarget"
+                    }
+                ]
+            },
+            {
+                "queryString": "Resources\r\n| project id",
+                "subscriptionIds": [
+                   "f4979986-a78a-426c-b18d-dce284670a5d"
+                ],
+                "type": "Query",
+                "id": "d45d9ecf-8d7a-4f19-be18-f8da7bd39663"
+            }
+        ]
+    },
+    "name": "ShutdownVM",
+    "apiVersion": "2025-09-22"
+}

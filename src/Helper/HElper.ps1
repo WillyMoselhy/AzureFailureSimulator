@@ -50,11 +50,13 @@ get-azrediscache
 
 $strings = (Get-ChildItem -Path .\src\AzureFailureSimulator\functions -Recurse -Filter *.ps1).BaseName | sort
 Update-PSFModuleManifest -Path .\src\AzureFailureSimulator\AzureFailureSimulator.psd1 -FunctionsToExport $strings
+
+
+
 remove-module AzureFailureSimulator -Force ; import-module .\src\AzureFailureSimulator
 
-
-
 Import-AzureFailureExperiment -Path .\src\Helper\Simulation01-PosgreSQL-Redis.jsonc -verbose
+
 
 Invoke-AzureFailureExperiment -Verbose -LogFolderPath "C:\temp\SimulatorLogs" -TraceOutputPath "C:\temp\SimulatorLogs\tracerOutput01.csv"
 
