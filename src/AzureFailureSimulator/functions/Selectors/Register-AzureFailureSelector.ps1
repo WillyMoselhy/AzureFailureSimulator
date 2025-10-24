@@ -71,8 +71,8 @@ function Register-AzureFailureSelector {
         # Register filters
         if($filter){
             Write-PSFMessage -Level Verbose -Message "Validating filter for selector Id: $($Id)"
-            if($targetObjects[0].Type -notin ("Microsoft.Compute/virtualMachineScaleSets","Microsoft.DBforPostgreSQL/flexibleServers")){ # TODO: Find a Better way to check if the target type supports filter
-                throw "Selector Id: $($Id) - Filter can only be applied when the target type is 'Microsoft.Compute/virtualMachineScaleSets' or 'Microsoft.DBforPostgreSQL/flexibleServers'."
+            if($targetObjects[0].Type -notin ("Microsoft.Compute/virtualMachineScaleSets","Microsoft.DBforPostgreSQL/flexibleServers","Microsoft.ContainerService/managedClusters")){ # TODO: Find a Better way to check if the target type supports filter
+                throw "Selector Id: $($Id) - Filter can only be applied when the target type is 'Microsoft.Compute/virtualMachineScaleSets' or 'Microsoft.DBforPostgreSQL/flexibleServers' or 'Microsoft.ContainerService/managedClusters'."
             }
             if(-not $filter.parameters.zones){
                 throw "Selector Id: $($Id) - Filter must have a 'parameters.zones' key."

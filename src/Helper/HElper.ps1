@@ -48,6 +48,11 @@ get-azrediscache
 (Get-AzResource -ResourceGroupName "vmss-demo"  -Name "azurefailure" -ResourceType "Microsoft.Cache/Redis" -WarningAction SilentlyContinue).properties.Instances
 
 
+$aksCluster = Get-AzAksCluster -Id '/subscriptions/44194899-7181-423a-9dbc-278d99a7683a/resourceGroups/vmss-demo/providers/Microsoft.ContainerService/managedClusters/aks-azurefailure'
+
+Update-AzAksNodePool -ClusterObject $aksCluster -Name agentpool -EnableAutoScaling:$false
+Update-AzAksNodePool -ClusterObject $aksCluster -Name agentpool -EnableAutoScaling:$true -MinCount 2 -MaxCount 5
+
 $strings = (Get-ChildItem -Path .\src\AzureFailureSimulator\functions -Recurse -Filter *.ps1).BaseName | sort
 Update-PSFModuleManifest -Path .\src\AzureFailureSimulator\AzureFailureSimulator.psd1 -FunctionsToExport $strings
 
@@ -55,8 +60,9 @@ Update-PSFModuleManifest -Path .\src\AzureFailureSimulator\AzureFailureSimulator
 
 remove-module AzureFailureSimulator -Force ; import-module .\src\AzureFailureSimulator
 
-Import-AzureFailureExperiment -Path .\src\Helper\Simulation01-PosgreSQL-Redis.jsonc -verbose
 
+
+Import-AzureFailureExperiment -Path .\src\Helper\Simulation01-PosgreSQL-Redis.jsonc -verbose
 
 Invoke-AzureFailureExperiment -Verbose -LogFolderPath "C:\temp\SimulatorLogs" -TraceOutputPath "C:\temp\SimulatorLogs\tracerOutput01.csv"
 

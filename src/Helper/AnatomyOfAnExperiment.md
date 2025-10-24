@@ -16,3 +16,4 @@ Branches run in parallel
 Actions run in sequence
 
 
+for AKS: [Great Blog Post - See AZ experiment](https://www.jannemattila.com/azure/2024/08/26/chaos-studio-and-aks.html)

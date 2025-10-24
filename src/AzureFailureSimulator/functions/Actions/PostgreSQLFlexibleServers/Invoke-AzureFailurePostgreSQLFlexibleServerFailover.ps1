@@ -79,7 +79,7 @@ function Invoke-AzureFailurePostgreSQLFlexibleServerFailover {
 
         Write-PSFMessage -Level Verbose -Message "Waiting for PostgreSQL Flexible Server failover jobs to complete"
 
-        $null = Wait-Job -Job $actionJobs
+        $null = Wait-Job -Job ($actionJobs | Where-Object { $_ -ne $false })
 
         Write-PSFMessage -Level Verbose -Message "PostgreSQL Flexible Server failover jobs complete"
     }

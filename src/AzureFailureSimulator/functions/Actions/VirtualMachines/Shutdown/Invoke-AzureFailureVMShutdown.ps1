@@ -50,7 +50,7 @@ function Invoke-AzureFailureVMShutdown {
 
         Write-PSFMessage -Level Verbose -Message "Waiting for VM shutdown jobs to complete"
 
-        $null = Wait-Job -Job $actionJobs
+        $null = Wait-Job -Job ($actionJobs | Where-Object { $_ -ne $false })
 
         Write-PSFMessage -Level Verbose -Message "VM shutdown jobs complete"
     }
