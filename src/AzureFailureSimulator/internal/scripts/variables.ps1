@@ -15,6 +15,8 @@ $script:Branches = @()
 
 $script:tracerOutput = @()
 
+$script:RestoreSkipped  = $false
+
 $script:ActionList = @{
     "urn:csci:microsoft:virtualMachine:shutdown/1.0" = @{
         TargetType       = "Microsoft.Compute/virtualMachines"

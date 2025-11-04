@@ -14,7 +14,8 @@ function Restore-AzureFailureVMScaleSetShutdown {
         [string] $Duration,
         [bool] $AbruptShutdown = $false,
 
-        [string] $ActionName = "urn:csci:microsoft:virtualMachineScaleSet:shutdown/2.0"
+        [string] $ActionName = "urn:csci:microsoft:virtualMachineScaleSet:shutdown/2.0",
+        [bool] $RestoreSkipped = $script:RestoreSkipped
     )
 
     Write-PSFMessage -Level Verbose -Message "Step ($Step), Branch ($Branch), Target(s) ($($TargetResourceId -join ', ')): Starting VM Scale Set Instances"
@@ -25,16 +26,21 @@ function Restore-AzureFailureVMScaleSetShutdown {
             $_.ResourceId -eq $target -and
             $_.Step -eq $Step -and
             $_.Branch -eq $Branch -and
-            $_.Action -eq  $ActionName
+            $_.Action -eq $ActionName
         }
 
-        if ($targetTrace.ActionSkipped) {
+        if ($targetTrace.ActionSkipped -and -not $RestoreSkipped) {
             Write-PSFMessage -Level Verbose -Message "Step ($Step), Branch ($Branch), Target ($target): Action was previously skipped. No instances to start."
-            $actionsJobs += $false
+            $actionJobs += $false
             continue
         }
 
-        $targetInstances = $targetTrace.TargetDetails.VMSSInstances
+        if ($RestoreSkipped) {
+            $targetInstances = $targetTrace.TargetDetails.VMSSInstances
+        }
+        else{
+            $targetInstances = $targetTrace.TargetDetails.VMSSInstancesToStop
+        }
         Write-PSFMessage -Level Verbose -Message "Starting VM Scale Set: $target - Instances ($($targetInstances -join ', '))"
         $vmSS = Get-AzVmss -ResourceId $target
 
@@ -61,7 +67,7 @@ function Restore-AzureFailureVMScaleSetShutdown {
                 ResourceId                = $TargetResourceId[$i]
                 Step                      = $Step
                 Branch                    = $Branch
-                Action                    =  $ActionName
+                Action                    = $ActionName
                 ActionRestoreCompleteTime = ($actionJobs[$i].PSEndTime )
             }
             Update-AzureFailureTrace @paramUpdateAzureFailureTrace

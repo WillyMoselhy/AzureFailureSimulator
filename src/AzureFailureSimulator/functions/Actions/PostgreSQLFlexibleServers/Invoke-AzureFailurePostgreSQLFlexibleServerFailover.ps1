@@ -15,14 +15,19 @@ function Invoke-AzureFailurePostgreSQLFlexibleServerFailover {
         [Parameter(Mandatory = $true)]
         [string[]] $Filter,
 
-        [bool] $ForcedFailover = $false
+        [bool] $ForcedFailover = $false,
+
+        [string] $ActionName = "urn:csci:microsoft:DBforPostgreSLFlexibleServers:failover/1.0",
+
+        [bool] $RestoreSkipped = $script:RestoreSkipped
     )
 
-    $actionName = "urn:csci:microsoft:DBforPostgreSLFlexibleServers:failover/1.0" #TODO: Apply this logic to all other actions.
-
+    if($RestoreSkipped){
+        Write-PSFMessage -Level Verbose -Message "This action does not support restore of previously skipped actions."
+    }
 
     if ($ForcedFailover) {
-        Write-PSFMessage -Level Warning -Message "Step ($Step), Branch ($Branch), action ($actionName):Forced Failover enabled. This may cause data loss."
+        Write-PSFMessage -Level Warning -Message "Step ($Step), Branch ($Branch), action ($ActionName):Forced Failover enabled. This may cause data loss."
     }
 
     $actionJobs = @()
@@ -67,7 +72,7 @@ function Invoke-AzureFailurePostgreSQLFlexibleServerFailover {
             ResourceId        = $target
             Step              = $Step
             Branch            = $Branch
-            Action            = $actionName
+            Action            = $ActionName
             ActionSkipped     = $actionSkipped
             ActionSkipMessage = $actionSkipMessage
             ActionTriggerTime = Get-Date
@@ -90,7 +95,7 @@ function Invoke-AzureFailurePostgreSQLFlexibleServerFailover {
                 ResourceId         = $TargetResourceId[$i]
                 Step               = $Step
                 Branch             = $Branch
-                Action             = $actionName
+                Action             = $ActionName
                 ActionCompleteTime = $actionCompleteTime
             }
             Update-AzureFailureTrace @paramUpdateAzureFailureTrace

@@ -12,7 +12,11 @@ function Restore-AzureFailureVMShutdown {
 
         # These might not be used but added for consistency.
         [string] $Duration,
-        [bool] $AbruptShutdown = $false
+        [bool] $AbruptShutdown = $false,
+
+        [string] $ActionName = "urn:csci:microsoft:virtualMachine:shutdown/1.0",
+
+        [bool] $RestoreSkipped = $script:RestoreSkipped
     )
 
     Write-PSFMessage -Level Verbose -Message "Starting VM(s) for Step ($Step), Branch ($Branch), Target(s): $($TargetResourceId -join ', ')"
@@ -22,11 +26,11 @@ function Restore-AzureFailureVMShutdown {
             $_.ResourceId -eq $target -and
             $_.Step -eq $Step -and
             $_.Branch -eq $Branch -and
-            $_.Action -eq "urn:csci:microsoft:virtualMachine:shutdown/1.0"
+            $_.Action -eq $ActionName
         }
-        if ($targetTrace.ActionSkipped) {
+        if ($targetTrace.ActionSkipped -and -not $RestoreSkipped) {
             Write-PSFMessage -Level Verbose -Message "Step ($Step), Branch ($Branch), Target ($target): Action was previously skipped. No instances to start."
-            $actionsJobs += $false
+            $actionJobs += $false
             continue
         }
 
@@ -38,7 +42,7 @@ function Restore-AzureFailureVMShutdown {
             ResourceId               = $target
             Step                     = $Step
             Branch                   = $Branch
-            Action                   = "urn:csci:microsoft:virtualMachine:shutdown/1.0"
+            Action                   = $ActionName
             ActionRestoreTriggerTime = Get-Date
         }
         Update-AzureFailureTrace @paramUpdateAzureFailureTrace
@@ -56,7 +60,7 @@ function Restore-AzureFailureVMShutdown {
                 ResourceId                = $TargetResourceId[$i]
                 Step                      = $Step
                 Branch                    = $Branch
-                Action                    = "urn:csci:microsoft:virtualMachine:shutdown/1.0"
+                Action                    = $ActionName
                 ActionRestoreCompleteTime = ($actionJobs[$i] | Receive-Job).EndTime
             }
             Update-AzureFailureTrace @paramUpdateAzureFailureTrace

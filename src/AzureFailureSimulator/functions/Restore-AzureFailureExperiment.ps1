@@ -1,13 +1,17 @@
 function Restore-AzureFailureExperiment {
     [CmdletBinding()]
     param (
-        # Add option to restore specific steps?
+        [switch] $RestoreSkipped
     )
 
     trap {
         throw $_
     }
 
+    if($RestoreSkipped){
+        Write-PSFMessage -Level Verbose -Message "Skipped resources will be started during restore."
+        $script:RestoreSkipped = $true
+    }
     # Go over the steps in reverse order
     foreach($step in ($script:Steps[($script:Steps.count-1)..0])){
         Write-PSFMessage -Level Verbose -Message "Restoring step: $($step.Name)"
