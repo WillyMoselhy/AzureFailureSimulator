@@ -32,7 +32,7 @@ function Invoke-AzureFailureVMShutdown {
         }
         else {
             Write-PSFMessage -Level Warning -Message "Step ($Step), Branch ($Branch), Target ($target): VM is not in 'running' state. Current state: $($vmStatus.Statuses[1].DisplayStatus). Skipping shutdown."
-            $actionsJobs += $false
+            $actionJobs += $false
             $actionSkipped = $true
             $actionSkipMessage = 'VM is not in running state'
         }
