@@ -33,11 +33,11 @@ function Invoke-AzureFailureVMScaleSetShutdown {
             $vmSSInstances = $vmSSInstances | Where-Object { $_.Zones[0] -in $Filter }
             Write-PSFMessage -Level Verbose -Message "Step ($Step) - Branch ($Branch) - Target ($target): Filtered to $($vmSSInstances.Count) instances in Zone(s): $($Filter -join ', ')"
         }
-        $vmSSInstances = $vmSSInstances | Where-Object { $_.InstanceView.Statuses[1].Code -eq "PowerState/running" }
+        $vmSSInstancesToStop = $vmSSInstances | Where-Object { $_.InstanceView.Statuses[1].Code -eq "PowerState/running" }
 
-        if ($vmSSInstances) {
-            Write-PSFMessage -Level Verbose -Message "Step ($Step) - Branch ($Branch) - Target ($target): Stopping $($vmSSInstances.Count) running instances in VMSS [$($vmSSInstances.InstanceId -join ', ')]"
-            $actionJobs += $vmSS | Stop-AzVmss -InstanceId $vmSSInstances.InstanceId -Force:$true -SkipShutdown:$AbruptShutdown -StayProvisioned -AsJob
+        if ($vmSSInstancesToStop) {
+            Write-PSFMessage -Level Verbose -Message "Step ($Step) - Branch ($Branch) - Target ($target): Stopping $($vmSSInstancesToStop.Count) running instances in VMSS [$($vmSSInstancesToStop.InstanceId -join ', ')]"
+            $actionJobs += $vmSS | Stop-AzVmss -InstanceId $vmSSInstancesToStop.InstanceId -Force:$true -SkipShutdown:$AbruptShutdown -StayProvisioned -AsJob
 
             $actionSkipped = $false
             $actionSkipMessage = ''
@@ -54,12 +54,10 @@ function Invoke-AzureFailureVMScaleSetShutdown {
             Step              = $Step
             Branch            = $Branch
             ResourceId        = $target
-            TargetDetails     = if ($vmSSInstances) {
-                @{
-                    VMSSInstances = $vmSSInstances.InstanceId
-                }
+            TargetDetails     = @{
+                VMSSInstancesToStop = $vmSSInstancesToStop.InstanceId
+                VMSSInstances = $vmSSInstances.InstanceId
             }
-            else { $null }
             Action            = $actionName
             ActionSkipped     = $actionSkipped
             ActionSkipMessage = $actionSkipMessage

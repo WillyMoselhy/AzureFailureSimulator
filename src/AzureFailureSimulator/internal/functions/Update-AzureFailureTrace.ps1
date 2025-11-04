@@ -50,7 +50,12 @@ function Update-AzureFailureTrace {
             $existingEntry.ActionTriggerTime = $ActionTriggerTime
         }
         if ($ActionCompleteTime) {
-            $existingEntry.ActionCompleteTime = $ActionCompleteTime
+            if($existingEntry.ActionSkipped) {
+                $existingEntry.ActionCompleteTime = $existingEntry.ActionTriggerTime
+            }
+            else{
+                $existingEntry.ActionCompleteTime = $ActionCompleteTime
+            }
             if ($existingEntry.ActionTriggerTime) {
                 $existingEntry.ActionDuration = $ActionCompleteTime - $existingEntry.ActionTriggerTime
             }
@@ -59,7 +64,12 @@ function Update-AzureFailureTrace {
             $existingEntry.ActionRestoreTriggerTime = $ActionRestoreTriggerTime
         }
         if ($ActionRestoreCompleteTime) {
-            $existingEntry.ActionRestoreCompleteTime = $ActionRestoreCompleteTime
+            if($existingEntry.ActionSkipped) {
+                $existingEntry.ActionRestoreCompleteTime = $existingEntry.ActionRestoreTriggerTime
+            }
+            else{
+                $existingEntry.ActionRestoreCompleteTime = $ActionRestoreCompleteTime
+            }
             if ($existingEntry.ActionRestoreTriggerTime) {
                 $existingEntry.ActionRestoreDuration = $ActionRestoreCompleteTime - $existingEntry.ActionRestoreTriggerTime
             }

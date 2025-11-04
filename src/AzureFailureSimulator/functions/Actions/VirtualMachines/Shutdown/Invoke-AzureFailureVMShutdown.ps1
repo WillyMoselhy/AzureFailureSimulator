@@ -11,7 +11,9 @@ function Invoke-AzureFailureVMShutdown {
         [string[]] $TargetResourceId,
 
         [string] $Duration,
-        [bool] $AbruptShutdown = $false
+        [bool] $AbruptShutdown = $false,
+
+        [string] $ActionName = "urn:csci:microsoft:virtualMachine:shutdown/1.0"
     )
 
 
@@ -30,7 +32,7 @@ function Invoke-AzureFailureVMShutdown {
         }
         else {
             Write-PSFMessage -Level Warning -Message "Step ($Step), Branch ($Branch), Target ($target): VM is not in 'running' state. Current state: $($vmStatus.Statuses[1].DisplayStatus). Skipping shutdown."
-            $actionsJobs += $false
+            $actionJobs += $false
             $actionSkipped = $true
             $actionSkipMessage = 'VM is not in running state'
         }
@@ -39,7 +41,7 @@ function Invoke-AzureFailureVMShutdown {
             ResourceId        = $target
             Step              = $Step
             Branch            = $Branch
-            Action            = "urn:csci:microsoft:virtualMachine:shutdown/1.0"
+            Action            = $ActionName
             ActionSkipped     = $actionSkipped
             ActionSkipMessage = $actionSkipMessage
             ActionTriggerTime = Get-Date
@@ -60,7 +62,7 @@ function Invoke-AzureFailureVMShutdown {
             ResourceId         = $TargetResourceId[$i]
             Step               = $Step
             Branch             = $Branch
-            Action             = "urn:csci:microsoft:virtualMachine:shutdown/1.0"
+            Action             = $ActionName
             ActionCompleteTime = $actionCompleteTime
         }
         Update-AzureFailureTrace @paramUpdateAzureFailureTrace

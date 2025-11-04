@@ -12,15 +12,15 @@ function Restore-AzureFailurePostgreSQLFlexibleServerFailover {
 
         [string] $Duration,
 
-        [bool] $ForcedFailover = $false #This parameter is ignored in restore operation.
+        [bool] $ForcedFailover = $false, #This parameter is ignored in restore operation.
+
+        [string] $ActionName = "urn:csci:microsoft:DBforPostgreSLFlexibleServers:failover/1.0"
 
     )
 
-    $actionName = "urn:csci:microsoft:DBforPostgreSLFlexibleServers:failover/1.0" #TODO: Apply this logic to all other actions.
-
 
     if ($ForcedFailover) {
-        Write-PSFMessage -Level Warning -Message "Step ($Step), Branch ($Branch), action ($actionName):Forced Failover enabled. This may cause data loss."
+        Write-PSFMessage -Level Warning -Message "Step ($Step), Branch ($Branch), action ($ActionName):Forced Failover enabled. This may cause data loss."
     }
 
     $actionJobs = @()
@@ -31,7 +31,7 @@ function Restore-AzureFailurePostgreSQLFlexibleServerFailover {
             $_.ResourceId -eq $target -and
             $_.Step -eq $Step -and
             $_.Branch -eq $Branch -and
-            $_.Action -eq $actionName
+            $_.Action -eq $ActionName
         }
 
         if ($targetTrace.ActionSkipped) {
@@ -48,7 +48,7 @@ function Restore-AzureFailurePostgreSQLFlexibleServerFailover {
             ResourceId               = $target
             Step                     = $Step
             Branch                   = $Branch
-            Action                   = $actionName
+            Action                   = $ActionName
             ActionRestoreTriggerTime = Get-Date
         }
         Update-AzureFailureTrace @paramUpdateAzureFailureTrace
@@ -69,7 +69,7 @@ function Restore-AzureFailurePostgreSQLFlexibleServerFailover {
                 ResourceId                = $TargetResourceId[$i]
                 Step                      = $Step
                 Branch                    = $Branch
-                Action                    = $actionName
+                Action                    = $ActionName
                 ActionRestoreCompleteTime = $actionCompleteTime
             }
             Update-AzureFailureTrace @paramUpdateAzureFailureTrace
