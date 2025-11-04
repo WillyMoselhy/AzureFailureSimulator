@@ -13,12 +13,13 @@ function Invoke-AzureFailureCacheForRedisReboot {
         [ValidateSet("PrimaryNode", "SecondaryNode", "AllNodes")]
         [string] $RebootType = 'PrimaryNode',
 
-        [string] $ShardId = '0'
+        [string] $ShardId = '0',
+
+        [string] $ActionName = "urn:csci:microsoft:azureClusteredCacheForRedis:reboot/1.0"
 
 
     )
 
-    $actionName = "urn:csci:microsoft:azureClusteredCacheForRedis:reboot/1.0" #TODO: Apply this logic to all other actions.
 
 
     foreach ($target in $TargetResourceId) {
@@ -37,7 +38,7 @@ function Invoke-AzureFailureCacheForRedisReboot {
             ResourceId         = $target
             Step               = $Step
             Branch             = $Branch
-            Action             = $actionName
+            Action             = $ActionName
             ActionSkipped      = $actionSkipped
             ActionSkipMessage  = $actionSkipMessage
             ActionTriggerTime  = $actionTriggerTime
