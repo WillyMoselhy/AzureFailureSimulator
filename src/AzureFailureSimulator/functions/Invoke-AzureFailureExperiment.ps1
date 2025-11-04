@@ -1,5 +1,5 @@
 function Invoke-AzureFailureExperiment {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $true)]
     param (
         [Parameter(Mandatory = $false)]
         [string] $LogFolderPath,

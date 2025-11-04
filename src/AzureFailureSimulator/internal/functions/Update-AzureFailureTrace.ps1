@@ -50,10 +50,10 @@ function Update-AzureFailureTrace {
             $existingEntry.ActionTriggerTime = $ActionTriggerTime
         }
         if ($ActionCompleteTime) {
-            if($existingEntry.ActionSkipped) {
+            if ($existingEntry.ActionSkipped) {
                 $existingEntry.ActionCompleteTime = $existingEntry.ActionTriggerTime
             }
-            else{
+            else {
                 $existingEntry.ActionCompleteTime = $ActionCompleteTime
             }
             if ($existingEntry.ActionTriggerTime) {
@@ -64,12 +64,7 @@ function Update-AzureFailureTrace {
             $existingEntry.ActionRestoreTriggerTime = $ActionRestoreTriggerTime
         }
         if ($ActionRestoreCompleteTime) {
-            if($existingEntry.ActionSkipped) {
-                $existingEntry.ActionRestoreCompleteTime = $existingEntry.ActionRestoreTriggerTime
-            }
-            else{
-                $existingEntry.ActionRestoreCompleteTime = $ActionRestoreCompleteTime
-            }
+            $existingEntry.ActionRestoreCompleteTime = $ActionRestoreCompleteTime
             if ($existingEntry.ActionRestoreTriggerTime) {
                 $existingEntry.ActionRestoreDuration = $ActionRestoreCompleteTime - $existingEntry.ActionRestoreTriggerTime
             }
@@ -114,6 +109,6 @@ function Update-AzureFailureTrace {
 
     if ($TraceOutputPath) {
         Write-PSFMessage -Level Verbose -Message "Exporting trace output to $TraceOutputPath"
-        $script:tracerOutput | Select-Object -ExcludeProperty TargetDetails| Export-Csv -Path $TraceOutputPath
+        $script:tracerOutput | Select-Object -ExcludeProperty TargetDetails | Export-Csv -Path $TraceOutputPath -WhatIf:$false
     }
 }

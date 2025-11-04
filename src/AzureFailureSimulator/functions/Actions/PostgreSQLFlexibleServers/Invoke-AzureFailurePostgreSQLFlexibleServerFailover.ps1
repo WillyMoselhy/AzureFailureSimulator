@@ -1,5 +1,5 @@
 function Invoke-AzureFailurePostgreSQLFlexibleServerFailover {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $true)]
     param (
         [Parameter(Mandatory = $true)]
         [string] $Step,
@@ -63,7 +63,11 @@ function Invoke-AzureFailurePostgreSQLFlexibleServerFailover {
             }
             $rgName = ($target -split '/')[4]
             $serverName = ($target -split '/')[-1]
-            $actionJobs += Restart-AzPostgreSqlFlexibleServer -ResourceGroupName $rgName -Name $serverName -RestartWithFailover -FailoverMode $paramFailoverMode -AsJob
+
+            if($PSCmdlet.ShouldProcess("PostgreSQL Flexible Server", "Failover")){
+                $actionJobs += Restart-AzPostgreSqlFlexibleServer -ResourceGroupName $rgName -Name $serverName -RestartWithFailover -FailoverMode $paramFailoverMode -AsJob
+            }
+
             $actionSkipped = $false
         }
 

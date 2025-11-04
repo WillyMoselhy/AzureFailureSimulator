@@ -1,5 +1,5 @@
 function Invoke-AzureFailureCacheForRedisReboot {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $true)]
     param (
         [Parameter(Mandatory = $true)]
         [string] $Step,
@@ -20,8 +20,6 @@ function Invoke-AzureFailureCacheForRedisReboot {
 
     )
 
-
-
     foreach ($target in $TargetResourceId) {
         Write-PSFMessage -Level Verbose -Message "Step ($Step), Branch ($Branch), Target ($target): Rebooting $($RebootType)."
 
@@ -30,7 +28,11 @@ function Invoke-AzureFailureCacheForRedisReboot {
         $serverName = ($target -split '/')[-1]
 
         $actionTriggerTime = Get-Date
-        Reset-AzRedisCache -ResourceGroupName $rgName -Name $serverName -RebootType $RebootType -Force -ShardId $ShardId
+
+        if ($PSCmdlet.ShouldProcess("Redis Cache", "Reboot")) {
+            Reset-AzRedisCache -ResourceGroupName $rgName -Name $serverName -RebootType $RebootType -Force -ShardId $ShardId
+        }
+
         $actionCompleteTime = Get-Date
         $actionSkipped = $false
 
