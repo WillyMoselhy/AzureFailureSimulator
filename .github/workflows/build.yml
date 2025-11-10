@@ -5,8 +5,8 @@ on:
   push:
     branches:
       - '**' # Trigger on all branches
-    #paths:
-    #  - 'AzureFailureSimulator/**'
+    paths:
+      - 'AzureFailureSimulator/**'
 jobs:
   publish-to-gallery:
     runs-on: ubuntu-latest
@@ -14,7 +14,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4.1.2
         with:
-          ref: ${{ github.head_ref}}
+          ref: ${{ github.head_ref }}
 
       - name: Prerequisites
         shell: pwsh
