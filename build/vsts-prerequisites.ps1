@@ -23,4 +23,4 @@ foreach ($dependency in $data.RequiredModules) {
 
 
 Write-Host "Installing modules $($modules -join '-')" -ForegroundColor Cyan
-Install-PSResource $module -AcceptLicense -TrustRepository
+Install-PSResource $modules -AcceptLicense -TrustRepository
