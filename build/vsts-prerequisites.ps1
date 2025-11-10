@@ -6,7 +6,7 @@
 #$modules = @("Pester", "PSFramework", "PSModuleDevelopment", "PSScriptAnalyzer")
 $modules = @( "PSFramework")
 
-<#
+
 # Automatically add missing dependencies
 $data = Import-PowerShellDataFile -Path "$PSScriptRoot\..\AzureFailureSimulator\AzureFailureSimulator.psd1"
 foreach ($dependency in $data.RequiredModules) {
@@ -19,7 +19,7 @@ foreach ($dependency in $data.RequiredModules) {
         $modules += $dependency.ModuleName
     }
 }
-#>
+
 
 foreach ($module in $modules) {
     Write-Host "Installing $module" -ForegroundColor Cyan
