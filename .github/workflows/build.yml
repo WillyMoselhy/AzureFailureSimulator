@@ -16,5 +16,5 @@ jobs:
           APIKey: ${{ secrets.APIKey }}
         shell: pwsh
         run: |
-          get-childitem -recurse
+          Get-ChildItem -Recurse
           ./build/vsts-build.ps1 -ApiKey $env:APIKey -AutoVersion
