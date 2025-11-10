@@ -1,24 +1,18 @@
-﻿on:
-  workflow_dispatch:
+﻿name: Publish PowerShell Module
+
+on:
   push:
     branches:
-      - '**' # Trigger on all branches
+      - Development
 
 jobs:
-  build:
-
-    runs-on: windows-latest
-
+  publish-to-gallery:
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - name: Install Prerequisites
-      run: .\build\vsts-prerequisites.ps1
-      shell: powershell
-    - name: Validate
-      run: .\build\vsts-validate.ps1
-      shell: powershell
-    - name: Build
-      run: .\build\vsts-build.ps1 -ApiKey $env:APIKEY
-      shell: powershell
-      env:
-        APIKEY: ${{ secrets.ApiKey }}
+      - name: Build and Publish
+        env:
+          APIKey: ${{ secrets.APIKey }}
+        shell: pwsh
+        run: |
+          get-childitem -recurse
+          #./build/vsts-build.ps1 -ApiKey $env:APIKey -AutoVersion
