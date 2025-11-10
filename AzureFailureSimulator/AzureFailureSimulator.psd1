@@ -12,21 +12,26 @@
     Author            = 'wmoselhy'
 
     # Company or vendor of this module
-    CompanyName       = 'MyCompany'
+    CompanyName       = 'PlusOn.Tech'
 
     # Copyright statement for this module
-    Copyright         = 'Copyright (c) 2025 wmoselhy'
+    Copyright         = 'Copyright (c) 2025 PlusOn.Tech'
 
     # Description of the functionality provided by this module
     Description       = 'A PowerShell module to simulate Azure resource failures'
 
     # Minimum version of the Windows PowerShell engine required by this module
-    PowerShellVersion = '5.0'
+    PowerShellVersion = '7.0'
 
     # Modules that must be imported into the global environment prior to importing
     # this module
     RequiredModules   = @(
-        @{ ModuleName = 'PSFramework'; ModuleVersion = '1.13.406' }
+        @{ ModuleName = 'PSFramework'   ; ModuleVersion = '1.13.406' }
+        @{ ModuleName = 'Az.Aks'; ModuleVersion = '6.1.1' }
+        @{ ModuleName = 'Az.Compute'; ModuleVersion = '9.3.0' }
+        @{ ModuleName = 'Az.PostgreSql'; ModuleVersion = '1.2.0' }
+        @{ ModuleName = 'Az.RedisCache'; ModuleVersion = '1.11.0' }
+        @{ ModuleName = 'Az.Resources'; ModuleVersion = '7.11.0' }
     )
 
     # Assemblies that must be loaded prior to importing this module
@@ -40,28 +45,28 @@
 
     # Functions to export from this module
     FunctionsToExport = @(
-    'Get-AzureFailureActionList'
-    'Get-AzureFailureBranch'
-    'Get-AzureFailureSelector'
-    'Get-AzureFailureStep'
-    'Get-AzureFailureTrace'
-    'Import-AzureFailureExperiment'
-    'Invoke-AzureFailureAKSShutdown'
-    'Invoke-AzureFailureCacheForRedisReboot'
-    'Invoke-AzureFailureDelay'
-    'Invoke-AzureFailureExperiment'
-    'Invoke-AzureFailurePostgreSQLFlexibleServerFailover'
-    'Invoke-AzureFailureVMScaleSetShutdown'
-    'Invoke-AzureFailureVMShutdown'
-    'Register-AzureFailureBranch'
-    'Register-AzureFailureSelector'
-    'Register-AzureFailureStep'
-    'Restore-AzureFailureAKSShutdown'
-    'Restore-AzureFailureExperiment'
-    'Restore-AzureFailurePostgreSQLFlexibleServerFailover'
-    'Restore-AzureFailureVMScaleSetShutdown'
-    'Restore-AzureFailureVMShutdown'
-)
+        'Get-AzureFailureActionList'
+        'Get-AzureFailureBranch'
+        'Get-AzureFailureSelector'
+        'Get-AzureFailureStep'
+        'Get-AzureFailureTrace'
+        'Import-AzureFailureExperiment'
+        'Invoke-AzureFailureAKSShutdown'
+        'Invoke-AzureFailureCacheForRedisReboot'
+        'Invoke-AzureFailureDelay'
+        'Invoke-AzureFailureExperiment'
+        'Invoke-AzureFailurePostgreSQLFlexibleServerFailover'
+        'Invoke-AzureFailureVMScaleSetShutdown'
+        'Invoke-AzureFailureVMShutdown'
+        'Register-AzureFailureBranch'
+        'Register-AzureFailureSelector'
+        'Register-AzureFailureStep'
+        'Restore-AzureFailureAKSShutdown'
+        'Restore-AzureFailureExperiment'
+        'Restore-AzureFailurePostgreSQLFlexibleServerFailover'
+        'Restore-AzureFailureVMScaleSetShutdown'
+        'Restore-AzureFailureVMShutdown'
+    )
 
     # Cmdlets to export from this module
     CmdletsToExport   = ''
@@ -103,11 +108,3 @@
 
     } # End of PrivateData hashtable
 }
-
-
-
-
-
-
-
-

@@ -1,0 +1,29 @@
+﻿name: Publish PowerShell Module
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - '**' # Trigger on all branches
+    paths:
+      - 'AzureFailureSimulator/**'
+jobs:
+  publish-to-gallery:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.1.2
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Prerequisites
+        shell: pwsh
+        run: |
+          ./build/vsts-prerequisites.ps1
+
+      - name: Build and Publish
+        env:
+          APIKey: ${{ secrets.APIKey }}
+        shell: pwsh
+        run: |
+          ./build/vsts-build.ps1 -ApiKey $env:APIKey -AutoVersion
