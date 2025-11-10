@@ -16,6 +16,11 @@ jobs:
         with:
           ref: ${{ github.head_ref}}
 
+      - name: Prerequisites
+        shell: pwsh
+        run: |
+          ./build/vsts-prerequisites.ps1
+
       - name: Build and Publish
         env:
           APIKey: ${{ secrets.APIKey }}
