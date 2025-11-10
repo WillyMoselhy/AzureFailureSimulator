@@ -5,8 +5,8 @@ on:
   push:
     branches:
       - '**' # Trigger on all branches
-    paths:
-      - 'AzureFailureSimulator/**'
+    #paths:
+    #  - 'AzureFailureSimulator/**'
 jobs:
   publish-to-gallery:
     runs-on: ubuntu-latest
