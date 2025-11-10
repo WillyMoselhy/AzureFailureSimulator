@@ -21,8 +21,6 @@ foreach ($dependency in $data.RequiredModules) {
 }
 
 
-foreach ($module in $modules) {
-    Write-Host "Installing $module" -ForegroundColor Cyan
-    Install-PSResource $module -AcceptLicense -TrustRepository
-    #Import-Module $module -Force -PassThru
-}
+
+Write-Host "Installing modules $($modules -join '-')" -ForegroundColor Cyan
+Install-PSResource $module -AcceptLicense -TrustRepository
