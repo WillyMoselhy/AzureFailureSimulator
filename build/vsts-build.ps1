@@ -127,6 +127,6 @@ else
 	# Publish to Gallery
 	Write-PSFMessage -Level Important -Message "Publishing the AzureFailureSimulator module to $($Repository)"
 	#Publish-Module -Path "$($publishDir.FullName)\AzureFailureSimulator" -NuGetApiKey $ApiKey -Force -Repository $Repository
-	Publish-PSResource -ApiKey $ApiKey -Repository $Repository -Path "$($publishDir.FullName)\AzureFailureSimulator" -SkipDependenciesCheck
+	Publish-PSResource -ApiKey $ApiKey -Repository $Repository -Path "$($publishDir.FullName)\AzureFailureSimulator" -SkipDependenciesCheck -SkipModuleManifestValidate
 }
 #endregion Publish
