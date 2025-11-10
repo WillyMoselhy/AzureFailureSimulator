@@ -74,7 +74,7 @@ Restore-AzureFailureExperiment -Verbose -RestoreSkipped
 $modulePath = ".\AzureFailureSimulator"
 $commands = Get-ChildItem -Path "$modulePath\functions" -Recurse -Filter "*.ps1" | ForEach-Object {
     $content = [System.IO.File]::ReadAllText($_.FullName)
-    $matches = [regex]::Matches($content, 'Get-Az[A-Za-z0-9_]+')
+    $matches = [regex]::Matches($content, '\w*-Az[A-Za-z0-9_]+')
     foreach ($match in $matches) {
         $commandName = $match.Value
         $command = Get-Command -Name $commandName -ErrorAction SilentlyContinue
