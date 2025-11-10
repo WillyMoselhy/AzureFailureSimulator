@@ -17,4 +17,4 @@ jobs:
         shell: pwsh
         run: |
           get-childitem -recurse
-          #./build/vsts-build.ps1 -ApiKey $env:APIKey -AutoVersion
+          ./build/vsts-build.ps1 -ApiKey $env:APIKey -AutoVersion
