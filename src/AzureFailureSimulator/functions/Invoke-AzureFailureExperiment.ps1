@@ -1,5 +1,5 @@
 function Invoke-AzureFailureExperiment {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $true)]
     param (
         [Parameter(Mandatory = $false)]
         [string] $LogFolderPath,
@@ -44,7 +44,13 @@ function Invoke-AzureFailureExperiment {
                     $paramInvokeAzureFailureAction["Filter"] = $script:Selectors[$action.selectorId].Filter
                 }
                 Write-PSFMessage -Level Verbose -Message "Invoking Action Command: $($actionDefinition.Command) with parameters: $($paramInvokeAzureFailureAction | Out-String)"
-                & $actionDefinition.Command @paramInvokeAzureFailureAction
+                try{
+                    & $actionDefinition.Command @paramInvokeAzureFailureAction
+                }
+                catch{
+                    Write-PSFMessage -Level Error -Message "Error invoking action: {0} > {1} > {2}." -StringValues $step.Name, $branch, $action.Name -ErrorRecord $_ -Tag Critical, Fail
+                    throw # "In try catch you don't need $_ , in trap you need" -Friedrich Weinmann
+                }
             }
         }
     }

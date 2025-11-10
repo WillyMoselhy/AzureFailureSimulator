@@ -1,5 +1,5 @@
 function Invoke-AzureFailureVMScaleSetShutdown {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $true)]
     param (
         [Parameter(Mandatory = $true)]
         [string] $Step,
@@ -37,7 +37,10 @@ function Invoke-AzureFailureVMScaleSetShutdown {
 
         if ($vmSSInstancesToStop) {
             Write-PSFMessage -Level Verbose -Message "Step ($Step) - Branch ($Branch) - Target ($target): Stopping $($vmSSInstancesToStop.Count) running instances in VMSS [$($vmSSInstancesToStop.InstanceId -join ', ')]"
-            $actionJobs += $vmSS | Stop-AzVmss -InstanceId $vmSSInstancesToStop.InstanceId -Force:$true -SkipShutdown:$AbruptShutdown -StayProvisioned -AsJob
+
+            if ($PSCmdlet.ShouldProcess("VMSS Instances", "Stop") ) {
+                $actionJobs += $vmSS | Stop-AzVmss -InstanceId $vmSSInstancesToStop.InstanceId -Force:$true -SkipShutdown:$AbruptShutdown -StayProvisioned -AsJob
+            }
 
             $actionSkipped = $false
             $actionSkipMessage = ''

@@ -1,5 +1,5 @@
 function Invoke-AzureFailureVMShutdown {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $true)]
     param (
         [Parameter(Mandatory = $true)]
         [string] $Step,
@@ -27,7 +27,10 @@ function Invoke-AzureFailureVMShutdown {
 
         $vmStatus = Get-AzVM -ResourceId $target -Status
         if ( $vmStatus.Statuses[1].Code -eq "PowerState/running") {
-            $actionJobs += Stop-AzVM -Id $target -Force:$AbruptShutdown -AsJob
+            if ($PSCmdlet.ShouldProcess("Virtual Machine", "Shutdown")) {
+                $actionJobs += Stop-AzVM -Id $target -Force:$true -SkipShutdown:$AbruptShutdown -AsJob
+            }
+
             $actionSkipped = $false
         }
         else {

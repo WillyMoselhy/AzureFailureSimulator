@@ -7,7 +7,7 @@
         3) Shutdown all VMSS instances in each node pool in the targetted Zone(s) if specified.
 #>
 function Invoke-AzureFailureAKSShutdown {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $true)]
     param (
         [Parameter(Mandatory = $true)]
         [string] $Step,
@@ -47,8 +47,9 @@ function Invoke-AzureFailureAKSShutdown {
             $actionJobs = @()
             if ($nodePool.EnableAutoScaling) {
                 Write-PSFMessage -Level Verbose -Message "Step ($Step) - Branch ($Branch) - Target ($target): Disabling Auto-Scaling on Node Pool: $($nodePool.Name)"
-                $actionJobs += Update-AzAksNodePool -ClusterObject $aksCluster -Name $nodePool.Name -EnableAutoScaling:$false -AsJob
-
+                if ($PSCmdlet.ShouldProcess("Disable Auto-Scaling on Node Pool: $($nodePool.Name)")) {
+                    $actionJobs += Update-AzAksNodePool -ClusterObject $aksCluster -Name $nodePool.Name -EnableAutoScaling:$false -AsJob
+                }
             }
         }
         # For AKS Nodes we are updating AutoScale on all pools as one action in the trace.
@@ -70,7 +71,7 @@ function Invoke-AzureFailureAKSShutdown {
         }
 
 
-        $actionCompleteTime =  Get-Date
+        $actionCompleteTime = Get-Date
         $paramUpdateAzureFailureTrace = @{
             ResourceId         = $target
             Step               = $Step

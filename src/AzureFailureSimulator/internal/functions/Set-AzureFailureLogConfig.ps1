@@ -6,7 +6,7 @@ function Set-AzureFailureLogConfig {
     )
 
 
-    $path = New-Item -ItemType Directory -Path $LogFolderPath -Force
+    $path = New-Item -ItemType Directory -Path $LogFolderPath -Force -WhatIf:$false
 
     $dateTime = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
     $paramSetPSFLoggingProvider = @{

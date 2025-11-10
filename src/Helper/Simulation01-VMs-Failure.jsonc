@@ -1,0 +1,56 @@
+{
+    "properties": {
+        "steps": [
+            {
+                "name": "Step 1",
+                "branches": [
+                    {
+                        "name": "Branch 1",
+                        "actions": [
+                            {
+                                "name": "urn:csci:microsoft:virtualMachine:shutdown/1.0",
+                                "duration": "PT10M",
+                                "parameters": [
+                                    {
+                                        "key": "abruptShutdown",
+                                        "value": false
+                                    }
+                                ],
+                                "selectorId": "Selector1",
+                                "type": "continuous"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "selectors": [
+            {
+                "id": "Selector1",
+                "type": "List",
+                "targets": [
+                    {
+                        "id": "/subscriptions/44194899-7181-423a-9dbc-278d99a7683a/resourceGroups/adcb-lab/providers/microsoft.compute/virtualMachines/dc",
+                        "type": "ChaosTarget"
+                    },
+                    {
+                        "id": "/subscriptions/44194899-7181-423a-9dbc-278d99a7683a/resourceGroups/ADCB-Lab/providers/Microsoft.Compute/virtualMachines/hyper-vs",
+                        "type": "ChaosTarget"
+                    }
+                ]
+            },
+            {
+                "id": "Selector2",
+                "type": "List",
+                "targets": [
+                    {
+                        "id": "/subscriptions/44194899-7181-423a-9dbc-278d99a7683a/resourceGroups/ADCB-Lab/providers/Microsoft.Compute/virtualMachines/hyper-vs",
+                        "type": "ChaosTarget"
+                    }
+                ]
+            }
+        ]
+    },
+    "name": "ShutdownVM",
+    "apiVersion": "2025-09-22"
+}
