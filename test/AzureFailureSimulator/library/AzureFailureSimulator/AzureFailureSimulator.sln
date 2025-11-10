@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2010
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{53B85BF8-37C0-4B1D-9751-B7F67DF63C09}") = "AzureFailureSimulator", "AzureFailureSimulator\AzureFailureSimulator.csproj", "{1FC34D04-A0C4-40BE-8416-6086E50546C7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1FC34D04-A0C4-40BE-8416-6086E50546C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FC34D04-A0C4-40BE-8416-6086E50546C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FC34D04-A0C4-40BE-8416-6086E50546C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FC34D04-A0C4-40BE-8416-6086E50546C7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F44CEA0E-C35C-40AA-905A-54CFC5EBCF3B}
+	EndGlobalSection
+EndGlobal

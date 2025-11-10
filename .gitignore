@@ -1,0 +1,22 @@
+﻿
+# ignore the settings folder and files for VSCode and PSS
+.vscode/*
+*.psproj
+*TempPoint*
+
+# Ignore staging info from Visual Studio
+library/AzureFailureSimulator/.vs/*
+library/AzureFailureSimulator/AzureFailureSimulator/bin/*
+library/AzureFailureSimulator/AzureFailureSimulator/obj/*
+
+# ignore PowerShell Studio MetaData
+AzureFailureSimulator/AzureFailureSimulator.psproj
+AzureFailureSimulator/AzureFailureSimulator.psproj.bak
+AzureFailureSimulator/AzureFailureSimulator.psprojs
+AzureFailureSimulator/AzureFailureSimulator.psproj
+
+# ignore the TestResults
+TestResults/*
+
+# ignore the publishing Directory
+publish/*
