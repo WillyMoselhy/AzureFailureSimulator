@@ -23,6 +23,6 @@ foreach ($dependency in $data.RequiredModules) {
 
 foreach ($module in $modules) {
     Write-Host "Installing $module" -ForegroundColor Cyan
-    Install-PSResource $module -AcceptLicense
+    Install-PSResource $module -AcceptLicense -TrustRepository
     #Import-Module $module -Force -PassThru
 }
