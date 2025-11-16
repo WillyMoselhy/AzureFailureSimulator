@@ -41,6 +41,7 @@ $script:ActionList = @{
         TargetType       = "Microsoft.ContainerService/managedClusters"
         Parameters       = @(
             @{ Name = "abruptShutdown"; Type = "bool"; Required = $false }
+            @{ Name = "disableAutoScale"; Type = "bool"; Required = $false }
         )
         SupportsDuration = $true
         SupportsFilter   = $true

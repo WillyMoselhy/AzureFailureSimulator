@@ -16,6 +16,10 @@
                                     {
                                         "key": "abruptShutdown",
                                         "value": true
+                                    },
+                                    {
+                                        "key": "disableAutoScale",
+                                        "value": false
                                     }
                                 ]
                             }
