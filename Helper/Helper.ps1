@@ -69,6 +69,9 @@ Invoke-AzureFailureExperiment -Verbose -LogFolderPath "C:\temp\SimulatorLogs" -T
 Restore-AzureFailureExperiment -Verbose -RestoreSkipped
 
 
+# ERRORS
+* We Are not authenticated to Azure for example
+
 
 # Find all the get-az* commands and list their module
 $modulePath = ".\AzureFailureSimulator"

@@ -59,8 +59,8 @@ function Invoke-AzureFailureAKSShutdown {
             ResourceId        = $target
             TargetDetails     = $autoScaleTargetDetails
             Action            = $ActionName
-            ActionSkipped     = $false
-            ActionSkipMessage = ""
+            ActionStatus      = "Pending"
+            ActionMessage     = ""
             ActionTriggerTime = Get-Date
         }
         Update-AzureFailureTrace @paramUpdateAzureFailureTrace
@@ -77,6 +77,7 @@ function Invoke-AzureFailureAKSShutdown {
             Step               = $Step
             Branch             = $Branch
             Action             = $actionName
+            ActionStatus       = if ($WhatIfPreference -or $PSCmdlet.WhatIfIsPresent) { "WhatIf" } else { "Success" }
             ActionCompleteTime = $actionCompleteTime
         }
         Update-AzureFailureTrace @paramUpdateAzureFailureTrace

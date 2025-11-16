@@ -29,7 +29,7 @@ function Restore-AzureFailureVMScaleSetShutdown {
             $_.Action -eq $ActionName
         }
 
-        if ($targetTrace.ActionSkipped -and -not $RestoreSkipped) {
+        if ($targetTrace.ActionStatus -eq "Skipped" -and -not $RestoreSkipped) {
             Write-PSFMessage -Level Verbose -Message "Step ($Step), Branch ($Branch), Target ($target): Action was previously skipped. No instances to start."
             $actionJobs += $false
             continue

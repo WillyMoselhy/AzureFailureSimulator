@@ -20,10 +20,11 @@ function Update-AzureFailureTrace {
         [string] $Action,
 
         [Parameter(Mandatory = $false)]
-        [bool] $ActionSkipped,
+        [ValidateSet("Success","Skipped","Error","WhatIf","InProgress")] #Shall we add in progress?
+        [string] $ActionStatus,
 
         [Parameter(Mandatory = $false)]
-        [string] $ActionSkipMessage,
+        [string] $ActionMessage,
 
         [Parameter(Mandatory = $false)]
         [DateTime] $ActionTriggerTime,
@@ -50,7 +51,7 @@ function Update-AzureFailureTrace {
             $existingEntry.ActionTriggerTime = $ActionTriggerTime
         }
         if ($ActionCompleteTime) {
-            if ($existingEntry.ActionSkipped) {
+            if ($existingEntry.ActionStatus -eq "Skipped") {
                 $existingEntry.ActionCompleteTime = $existingEntry.ActionTriggerTime
             }
             else {
@@ -83,8 +84,8 @@ function Update-AzureFailureTrace {
             TargetDetails             = $TargetDetails
             TargetDetailsJson         = if ($TargetDetails) { $TargetDetails | ConvertTo-Json -Compress -Depth 3 } else { $null }
             Action                    = $Action
-            ActionSkipped             = $ActionSkipped
-            ActionSkipMessage         = $ActionSkipMessage
+            ActionStatus              = $ActionStatus
+            ActionMessage             = $ActionMessage
             ActionTriggerTime         = if ($ActionTriggerTime) { $ActionTriggerTime }         else { $null }
             ActionCompleteTime        = if ($ActionCompleteTime) { $ActionCompleteTime }        else { $null }
             ActionDuration            = $null

@@ -39,20 +39,20 @@ function Invoke-AzureFailurePostgreSQLFlexibleServerFailover {
         if ($pgSQLFlexibleServer.HighAvailabilityMode -ne "ZoneRedundant") {
             Write-PSFMessage -Level Warning -Message "Step ($Step), Branch ($Branch), Target ($target): Server is not configured for High Availability. Failover cannot be performed."
             $actionJobs += $false
-            $actionSkipped = $true
-            $actionSkipMessage = 'Not configured for High Availability'
+            $actionStatus = "Skipped"
+            $actionMessage = 'Not configured for High Availability'
         }
         elseif ($pgSQLFlexibleServer.HighAvailabilityState -ne "Healthy" -or $pgSQLFlexibleServer.State -ne "Ready") {
             Write-PSFMessage -Level Warning -Message "Step ($Step), Branch ($Branch), Target ($target): Server is not in a Healthy and Ready State. Failover cannot be performed."
             $actionJobs += $false
-            $actionSkipped = $true
-            $actionSkipMessage = 'Not in a Healthy and Ready State'
+            $actionStatus = "Skipped"
+            $actionMessage = 'Not in a Healthy and Ready State'
         }
         elseif ($pgSQLFlexibleServer.AvailabilityZone -notin $Filter) {
             Write-PSFMessage -Level Warning -Message "Step ($Step), Branch ($Branch), Target ($target): Server is not in the specified filter zones. Skipping failover."
             $actionJobs += $false
-            $actionSkipped = $true
-            $actionSkipMessage = 'Not in the specified filter zones'
+            $actionStatus = "Skipped"
+            $actionMessage = 'Not in the specified filter zones'
         }
         else {
             if ($ForcedFailover) {
@@ -68,7 +68,7 @@ function Invoke-AzureFailurePostgreSQLFlexibleServerFailover {
                 $actionJobs += Restart-AzPostgreSqlFlexibleServer -ResourceGroupName $rgName -Name $serverName -RestartWithFailover -FailoverMode $paramFailoverMode -AsJob
             }
 
-            $actionSkipped = $false
+            $actionStatus = "Success"
         }
 
 
@@ -77,8 +77,8 @@ function Invoke-AzureFailurePostgreSQLFlexibleServerFailover {
             Step              = $Step
             Branch            = $Branch
             Action            = $ActionName
-            ActionSkipped     = $actionSkipped
-            ActionSkipMessage = $actionSkipMessage
+            ActionStatus      = $actionStatus
+            ActionMessage     = $actionMessage
             ActionTriggerTime = Get-Date
         }
         Update-AzureFailureTrace @paramUpdateAzureFailureTrace

@@ -34,7 +34,7 @@ function Restore-AzureFailurePostgreSQLFlexibleServerFailover {
             $_.Action -eq $ActionName
         }
 
-        if ($targetTrace.ActionSkipped) {
+        if ($targetTrace.ActionStatus -eq "Skipped") {
             Write-PSFMessage -Level Verbose -Message "Step ($Step), Branch ($Branch), Target ($target): Action was previously skipped. Skipping restore."
             $actionsJobs += $false
             continue

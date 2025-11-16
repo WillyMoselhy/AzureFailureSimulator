@@ -42,15 +42,15 @@ function Invoke-AzureFailureVMScaleSetShutdown {
                 $actionJobs += $vmSS | Stop-AzVmss -InstanceId $vmSSInstancesToStop.InstanceId -Force:$true -SkipShutdown:$AbruptShutdown -StayProvisioned -AsJob
             }
 
-            $actionSkipped = $false
-            $actionSkipMessage = ''
+            $actionStatus = "Pending"
+            $actionMessage = ''
         }
         else {
             Write-PSFMessage -Level Warning -Message "Step ($Step) - Branch ($Branch) - Target ($target): No running instances found in VMSS to stop"
             $actionsJobs += $false
 
-            $actionSkipped = $true
-            $actionSkipMessage = 'No running instances found in VM Scale set to stop'
+            $actionStatus = "Skipped"
+            $actionMessage = 'No running instances found in VM Scale set to stop'
         }
 
         $paramUpdateAzureFailureTrace = @{
@@ -62,8 +62,8 @@ function Invoke-AzureFailureVMScaleSetShutdown {
                 VMSSInstances = $vmSSInstances.InstanceId
             }
             Action            = $actionName
-            ActionSkipped     = $actionSkipped
-            ActionSkipMessage = $actionSkipMessage
+            ActionStatus      = $actionStatus
+            ActionMessage     = $actionMessage
             ActionTriggerTime = Get-Date
         }
         Update-AzureFailureTrace @paramUpdateAzureFailureTrace

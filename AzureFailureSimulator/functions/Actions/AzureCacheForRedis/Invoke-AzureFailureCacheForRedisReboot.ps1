@@ -34,15 +34,15 @@ function Invoke-AzureFailureCacheForRedisReboot {
         }
 
         $actionCompleteTime = Get-Date
-        $actionSkipped = $false
+        $actionStatus = "Success"
 
         $paramUpdateAzureFailureTrace = @{
             ResourceId         = $target
             Step               = $Step
             Branch             = $Branch
             Action             = $ActionName
-            ActionSkipped      = $actionSkipped
-            ActionSkipMessage  = $actionSkipMessage
+            ActionStatus       = $actionStatus
+            ActionMessage      = $actionMessage
             ActionTriggerTime  = $actionTriggerTime
             ActionCompleteTime = $actionCompleteTime
 

@@ -31,13 +31,13 @@ function Invoke-AzureFailureVMShutdown {
                 $actionJobs += Stop-AzVM -Id $target -Force:$true -SkipShutdown:$AbruptShutdown -AsJob
             }
 
-            $actionSkipped = $false
+            $actionStatus = "InProgress"
         }
         else {
             Write-PSFMessage -Level Warning -Message "Step ($Step), Branch ($Branch), Target ($target): VM is not in 'running' state. Current state: $($vmStatus.Statuses[1].DisplayStatus). Skipping shutdown."
             $actionJobs += $false
-            $actionSkipped = $true
-            $actionSkipMessage = 'VM is not in running state'
+            $actionStatus = "Skipped"
+            $actionMessage = 'VM is not in running state'
         }
 
         $paramUpdateAzureFailureTrace = @{
@@ -45,13 +45,13 @@ function Invoke-AzureFailureVMShutdown {
             Step              = $Step
             Branch            = $Branch
             Action            = $ActionName
-            ActionSkipped     = $actionSkipped
-            ActionSkipMessage = $actionSkipMessage
+            ActionStatus      = $actionStatus
+            ActionMessage     = $actionMessage
             ActionTriggerTime = Get-Date
         }
         Update-AzureFailureTrace @paramUpdateAzureFailureTrace
     }
-    if ($actionJobs | Where-Object { $_ -ne $false })  {
+    if ($actionJobs | Where-Object { $_ -ne $false }) {
 
         Write-PSFMessage -Level Verbose -Message "Waiting for VM shutdown jobs to complete"
 
@@ -65,6 +65,7 @@ function Invoke-AzureFailureVMShutdown {
             ResourceId         = $TargetResourceId[$i]
             Step               = $Step
             Branch             = $Branch
+            ActionStatus       = "Success"
             Action             = $ActionName
             ActionCompleteTime = $actionCompleteTime
         }
