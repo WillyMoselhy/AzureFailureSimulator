@@ -42,7 +42,7 @@ function Invoke-AzureFailureVMScaleSetShutdown {
                 $actionJobs += $vmSS | Stop-AzVmss -InstanceId $vmSSInstancesToStop.InstanceId -Force:$true -SkipShutdown:$AbruptShutdown -StayProvisioned -AsJob
             }
 
-            $actionStatus = "Pending"
+            $actionStatus = "InProgress"
             $actionMessage = ''
         }
         else {
@@ -82,6 +82,8 @@ function Invoke-AzureFailureVMScaleSetShutdown {
             Step               = $Step
             Branch             = $Branch
             Action             = $actionName
+            ActionStatus       = if ($WhatIfPreference -or $PSCmdlet.WhatIfIsPresent) { "WhatIf" } else { "Success" }
+            ActionMessage      = ''
             ActionCompleteTime = $actionCompleteTime
         }
         Update-AzureFailureTrace @paramUpdateAzureFailureTrace

@@ -34,7 +34,7 @@ function Invoke-AzureFailureCacheForRedisReboot {
         }
 
         $actionCompleteTime = Get-Date
-        $actionStatus = "Success"
+        $actionStatus = if ($WhatIfPreference -or $PSCmdlet.WhatIfIsPresent) { "WhatIf" } else { "Success" }
 
         $paramUpdateAzureFailureTrace = @{
             ResourceId         = $target

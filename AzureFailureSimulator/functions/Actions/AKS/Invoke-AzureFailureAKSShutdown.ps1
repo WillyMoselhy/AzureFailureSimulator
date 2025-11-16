@@ -59,7 +59,7 @@ function Invoke-AzureFailureAKSShutdown {
             ResourceId        = $target
             TargetDetails     = $autoScaleTargetDetails
             Action            = $ActionName
-            ActionStatus      = "Pending"
+            ActionStatus      = "InProgress"
             ActionMessage     = ""
             ActionTriggerTime = Get-Date
         }

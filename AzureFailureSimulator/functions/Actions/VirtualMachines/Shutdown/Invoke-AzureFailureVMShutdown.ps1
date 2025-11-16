@@ -65,7 +65,8 @@ function Invoke-AzureFailureVMShutdown {
             ResourceId         = $TargetResourceId[$i]
             Step               = $Step
             Branch             = $Branch
-            ActionStatus       = "Success"
+            ActionStatus       = if ($WhatIfPreference -or $PSCmdlet.WhatIfIsPresent) { "WhatIf" } else { "Success" }
+            ActionMessage      = $actionMessage
             Action             = $ActionName
             ActionCompleteTime = $actionCompleteTime
         }

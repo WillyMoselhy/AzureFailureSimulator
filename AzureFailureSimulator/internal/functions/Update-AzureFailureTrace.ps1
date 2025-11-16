@@ -20,7 +20,7 @@ function Update-AzureFailureTrace {
         [string] $Action,
 
         [Parameter(Mandatory = $false)]
-        [ValidateSet("Success","Skipped","Error","WhatIf","InProgress")] #Shall we add in progress?
+        [ValidateSet("Success", "Skipped", "Error", "WhatIf", "InProgress")] #TODO: Add Restoring, Restored, RestoreError
         [string] $ActionStatus,
 
         [Parameter(Mandatory = $false)]
@@ -47,6 +47,9 @@ function Update-AzureFailureTrace {
         $_.Action -eq $Action
     }
     if ($existingEntry) {
+        $existingEntry.actionStatus = $ActionStatus
+        $existingEntry.actionMessage = $ActionMessage
+
         if ($ActionTriggerTime) {
             $existingEntry.ActionTriggerTime = $ActionTriggerTime
         }

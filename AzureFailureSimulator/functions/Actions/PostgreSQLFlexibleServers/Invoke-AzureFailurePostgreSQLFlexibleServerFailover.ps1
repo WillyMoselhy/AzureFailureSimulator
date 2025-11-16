@@ -68,7 +68,7 @@ function Invoke-AzureFailurePostgreSQLFlexibleServerFailover {
                 $actionJobs += Restart-AzPostgreSqlFlexibleServer -ResourceGroupName $rgName -Name $serverName -RestartWithFailover -FailoverMode $paramFailoverMode -AsJob
             }
 
-            $actionStatus = "Success"
+            $actionStatus = "InProgress"
         }
 
 
@@ -100,6 +100,8 @@ function Invoke-AzureFailurePostgreSQLFlexibleServerFailover {
                 Step               = $Step
                 Branch             = $Branch
                 Action             = $ActionName
+                ActionStatus       = if ($WhatIfPreference -or $PSCmdlet.WhatIfIsPresent) { "WhatIf" } else { "Success" }
+                ActionMessage      = $actionMessage
                 ActionCompleteTime = $actionCompleteTime
             }
             Update-AzureFailureTrace @paramUpdateAzureFailureTrace
