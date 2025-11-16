@@ -14,6 +14,8 @@ function Restore-AzureFailureAKSShutdown {
         [string] $Duration,
         [bool] $AbruptShutdown = $false,
 
+        [bool] $DisableAutoScale = $true,
+
         [string] $ActionName = "urn:csci:microsoft:AKS:shutdown/1.0"
 
     )
