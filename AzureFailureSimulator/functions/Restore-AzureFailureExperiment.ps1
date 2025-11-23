@@ -34,7 +34,7 @@ function Restore-AzureFailureExperiment {
                 $actionDefinition = $script:ActionList[$action.name]
                 
                 # Check if this is a PaaS resource and if PaaS restore should be skipped
-                if ($SkipPaaSRestore -and $actionDefinition.TargetType -in $paasResourceTypes) {
+                if ($SkipPaaSRestore -and $actionDefinition.TargetType -and $actionDefinition.TargetType -in $paasResourceTypes) {
                     Write-PSFMessage -Level Warning -Message "Skipping PaaS restore for action: $($step.Name) > $branch > $($action.Name) (TargetType: $($actionDefinition.TargetType))"
                     continue
                 }
