@@ -20,7 +20,7 @@ function Update-AzureFailureTrace {
         [string] $Action,
 
         [Parameter(Mandatory = $false)]
-        [ValidateSet("Success", "Skipped", "Error", "WhatIf", "InProgress")] #TODO: Add Restoring, Restored, RestoreError
+        [ValidateSet("InProgress", "Skipped", "WhatIf" ,"Success", "Error","Restoring", "Restored", "RestoreError")]
         [string] $ActionStatus,
 
         [Parameter(Mandatory = $false)]

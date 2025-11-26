@@ -57,12 +57,9 @@ $strings = (Get-ChildItem -Path .\src\AzureFailureSimulator\functions -Recurse -
 Update-PSFModuleManifest -Path .\src\AzureFailureSimulator\AzureFailureSimulator.psd1 -FunctionsToExport $strings
 
 
-
-
-
 remove-module AzureFailureSimulator -Force ; import-module .\AzureFailureSimulator
 
-Import-AzureFailureExperiment -Path .\Helper\Simulation01-AKS.jsonc -Verbose
+Import-AzureFailureExperiment -Path .\Helper\Simulation01-PosgreSQL-Redis.jsonc -Verbose
 
 Invoke-AzureFailureExperiment -Verbose -LogFolderPath "C:\temp\SimulatorLogs" -TraceOutputPath "C:\temp\SimulatorLogs\tracerOutput01.csv"
 

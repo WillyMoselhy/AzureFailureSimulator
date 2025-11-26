@@ -23,7 +23,7 @@ function Restore-AzureFailureAKSShutdown {
     Write-PSFMessage -Level Verbose -Message "Step ($Step), Branch ($Branch), Target(s) ($($TargetResourceId -join ', ')): Starting AKS Instances"
 
     foreach ($target in $TargetResourceId) {
-        $aksCluster = Get-AzAksCluster -Id $target
+        $aksCluster = Get-AzAksCluster -Id $target -ErrorAction Stop
 
         $nodeResourceGroup = $aksCluster.NodeResourceGroup
         $agentPoolProfile = $aksCluster.AgentPoolProfiles

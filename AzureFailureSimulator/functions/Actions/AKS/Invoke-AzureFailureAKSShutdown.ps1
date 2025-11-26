@@ -31,7 +31,7 @@ function Invoke-AzureFailureAKSShutdown {
     foreach ($target in $TargetResourceId) {
         Write-PSFMessage -Level Verbose -Message "Step ($Step) - Branch ($Branch) - Target ($target): Getting AKS Node Pools"
 
-        $aksCluster = Get-AzAksCluster -Id $target
+        $aksCluster = Get-AzAksCluster -Id $target -ErrorAction Stop
 
         $nodeResourceGroup = $aksCluster.NodeResourceGroup
         $agentPoolProfile = $aksCluster.AgentPoolProfiles
@@ -80,7 +80,7 @@ function Invoke-AzureFailureAKSShutdown {
                 Step               = $Step
                 Branch             = $Branch
                 Action             = $actionName
-                ActionStatus       = if ($WhatIfPreference -or $PSCmdlet.WhatIfIsPresent) { "WhatIf" } else { "Success" }
+                ActionStatus       = if ($WhatIfPreference) { "WhatIf" } else { "Success" }
                 ActionCompleteTime = $actionCompleteTime
             }
             Update-AzureFailureTrace @paramUpdateAzureFailureTrace

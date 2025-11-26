@@ -1,4 +1,5 @@
 function Invoke-AzureFailureExperiment {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSShouldProcess','', Justification="This function is a controller that invokes other functions that implement ShouldProcess.")]
     [CmdletBinding(SupportsShouldProcess = $true)]
     param (
         [Parameter(Mandatory = $false)]
@@ -11,10 +12,12 @@ function Invoke-AzureFailureExperiment {
         throw $_
     }
 
+    # Reset the trace output in case we are re-invoking the function in the same session.
+    $script:tracerOutput = @()
+
     if ($LogFolderPath) {
         Set-AzureFailureLogConfig -LogFolderPath $LogFolderPath
     }
-
 
     if ($TraceOutputPath) {
         $script:TraceOutputPath = $TraceOutputPath

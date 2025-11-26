@@ -23,54 +23,99 @@ function Invoke-AzureFailureVMShutdown {
 
     $actionJobs = @()
     foreach ($target in $TargetResourceId) {
+        $actionJob = @{
+            TargetResourceId = $target
+        }
         Write-PSFMessage -Level Verbose -Message "Shutting down VM: $target"
 
-        $vmStatus = Get-AzVM -ResourceId $target -Status
+
+        try {
+
+            $vmStatus = Get-AzVM -ResourceId $target -Status -ErrorAction Stop
+        }
+        catch {
+            Write-PSFMessage -Level Warning -Message "Step ($Step), Branch ($Branch), Target ($target): Failed to get VM status. Error: $($_.Exception.Message)."
+            $actionJob.Job = $false
+            $actionJob.Status = "Error"
+            $actionJob.StatusMessage = 'Failed to get VM status - {0}' -f ($_.Exception.Message -replace "`r`n", "\n")
+
+            $actionJobs += $actionJob
+
+            $paramUpdateAzureFailureTrace = @{
+                ResourceId        = $target
+                Step              = $Step
+                Branch            = $Branch
+                Action            = $ActionName
+                ActionStatus      = $actionJob.Status
+                ActionMessage     = $actionJob.StatusMessage
+                ActionTriggerTime = Get-Date
+            }
+            Update-AzureFailureTrace @paramUpdateAzureFailureTrace
+
+            continue
+        }
+
         if ( $vmStatus.Statuses[1].Code -eq "PowerState/running") {
             if ($PSCmdlet.ShouldProcess("Virtual Machine", "Shutdown")) {
-                $actionJobs += Stop-AzVM -Id $target -Force:$true -SkipShutdown:$AbruptShutdown -AsJob
+                $actionJob.Job = Stop-AzVM -Id $target -Force:$true -SkipShutdown:$AbruptShutdown -AsJob
             }
 
-            $actionStatus = "InProgress"
+            $actionJob.Status = "InProgress"
         }
         else {
             Write-PSFMessage -Level Warning -Message "Step ($Step), Branch ($Branch), Target ($target): VM is not in 'running' state. Current state: $($vmStatus.Statuses[1].DisplayStatus). Skipping shutdown."
-            $actionJobs += $false
-            $actionStatus = "Skipped"
-            $actionMessage = 'VM is not in running state'
+            $actionJob.Job = $false
+            $actionJob.Status = "Skipped"
+            $actionJob.StatusMessage = 'VM is not in running state'
         }
+
+        $actionJobs += $actionJob
 
         $paramUpdateAzureFailureTrace = @{
             ResourceId        = $target
             Step              = $Step
             Branch            = $Branch
             Action            = $ActionName
-            ActionStatus      = $actionStatus
-            ActionMessage     = $actionMessage
+            ActionStatus      = $actionJob.Status
+            ActionMessage     = $actionJob.StatusMessage
             ActionTriggerTime = Get-Date
         }
         Update-AzureFailureTrace @paramUpdateAzureFailureTrace
     }
-    if ($actionJobs | Where-Object { $_ -ne $false }) {
 
-        Write-PSFMessage -Level Verbose -Message "Waiting for VM shutdown jobs to complete"
+    $jobsToWaitFor = ($actionJobs | Where-Object { $_.Job -ne $false }).Job
+    if ($jobsToWaitFor) {
 
-        $null = Wait-Job -Job ($actionJobs | Where-Object { $_ -ne $false })
+        Write-PSFMessage -Level Verbose -Message "Waiting for {0} VM shutdown jobs to complete" -StringValues $jobsToWaitFor.Count
+
+        $null = Wait-Job -Job $jobsToWaitFor
 
         Write-PSFMessage -Level Verbose -Message "VM shutdown jobs complete"
     }
-    for ($i = 0; $i -lt $TargetResourceId.Count; $i++) {
-        $actionCompleteTime = if ($actionJobs[$i]) { ($actionJobs[$i] | Receive-Job).EndTime } else { Get-Date }
+
+    foreach ($actionJob in $actionJobs) {
+        if($actionJob.Status -in @("Error", "Skipped")) { #TODO: Handle errors in the $actionJob.Job
+            $actionStatus = $actionJob.Status
+        }
+        elseif($actionJob.Job.State -eq "Failed") {
+            $actionStatus = "Error"
+            $actionJob.StatusMessage = 'VM shutdown job failed: {0}' -f ($actionJob.Job.Error[0].Exception.Message -replace "`r`n", "\n")
+        }
+        else{
+            $actionStatus = if ($WhatIfPreference) { "WhatIf" } else { "Success" }
+        }
+        $actionCompleteTime = if ($actionJob.Job) { ($actionJob.Job | Receive-Job).EndTime } else { Get-Date }
         $paramUpdateAzureFailureTrace = @{
-            ResourceId         = $TargetResourceId[$i]
+            ResourceId         = $actionJob.TargetResourceId
             Step               = $Step
             Branch             = $Branch
-            ActionStatus       = if ($WhatIfPreference -or $PSCmdlet.WhatIfIsPresent) { "WhatIf" } else { "Success" }
-            ActionMessage      = $actionMessage
+            ActionStatus       = $actionStatus
+            ActionMessage      = $actionJob.StatusMessage
             Action             = $ActionName
             ActionCompleteTime = $actionCompleteTime
         }
         Update-AzureFailureTrace @paramUpdateAzureFailureTrace
     }
+
 
 }
