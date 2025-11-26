@@ -42,16 +42,19 @@ function Restore-AzureFailurePostgreSQLFlexibleServerFailover {
 
         $rgName = ($target -split '/')[4]
         $serverName = ($target -split '/')[-1]
-        $actionJobs += Restart-AzPostgreSqlFlexibleServer -ResourceGroupName $rgName -Name $serverName -RestartWithFailover -FailoverMode 'PlannedFailover' -AsJob
 
+        # Update trace to Restoring status
         $paramUpdateAzureFailureTrace = @{
             ResourceId               = $target
             Step                     = $Step
             Branch                   = $Branch
             Action                   = $ActionName
+            ActionStatus             = "Restoring"
             ActionRestoreTriggerTime = Get-Date
         }
         Update-AzureFailureTrace @paramUpdateAzureFailureTrace
+
+        $actionJobs += Restart-AzPostgreSqlFlexibleServer -ResourceGroupName $rgName -Name $serverName -RestartWithFailover -FailoverMode 'PlannedFailover' -AsJob
     }
 
     if ($actionJobs | Where-Object { $_ -ne $false }) {
@@ -65,14 +68,31 @@ function Restore-AzureFailurePostgreSQLFlexibleServerFailover {
     for ($i = 0; $i -lt $TargetResourceId.Count; $i++) {
         $actionCompleteTime = if ($actionJobs[$i]) { $actionJobs[$i].PSEndTime } else { Get-Date }
         if ($actionJobs[$i]) {
-            $paramUpdateAzureFailureTrace = @{
-                ResourceId                = $TargetResourceId[$i]
-                Step                      = $Step
-                Branch                    = $Branch
-                Action                    = $ActionName
-                ActionRestoreCompleteTime = $actionCompleteTime
+            try {
+                $null = $actionJobs[$i] | Receive-Job -ErrorAction Stop
+                $paramUpdateAzureFailureTrace = @{
+                    ResourceId                = $TargetResourceId[$i]
+                    Step                      = $Step
+                    Branch                    = $Branch
+                    Action                    = $ActionName
+                    ActionStatus              = "Restored"
+                    ActionRestoreCompleteTime = $actionCompleteTime
+                }
+                Update-AzureFailureTrace @paramUpdateAzureFailureTrace
             }
-            Update-AzureFailureTrace @paramUpdateAzureFailureTrace
+            catch {
+                Write-PSFMessage -Level Warning -Message "Step ($Step), Branch ($Branch), Target ($($TargetResourceId[$i])): Failed to restore PostgreSQL Flexible Server. Error: $($_.Exception.Message)."
+                $paramUpdateAzureFailureTrace = @{
+                    ResourceId                = $TargetResourceId[$i]
+                    Step                      = $Step
+                    Branch                    = $Branch
+                    Action                    = $ActionName
+                    ActionStatus              = "RestoreError"
+                    ActionMessage             = 'Failed to restore PostgreSQL Flexible Server - {0}' -f ($_.Exception.Message -replace "`r`n", "\n")
+                    ActionRestoreCompleteTime = Get-Date
+                }
+                Update-AzureFailureTrace @paramUpdateAzureFailureTrace
+            }
         }
     }
 }

@@ -36,16 +36,18 @@ function Restore-AzureFailureVMShutdown {
 
         Write-PSFMessage -Level Verbose -Message "Starting VM: $target"
 
-        $actionJobs += Start-AzVM -Id $target -AsJob
-
+        # Update trace to Restoring status
         $paramUpdateAzureFailureTrace = @{
             ResourceId               = $target
             Step                     = $Step
             Branch                   = $Branch
             Action                   = $ActionName
+            ActionStatus             = "Restoring"
             ActionRestoreTriggerTime = Get-Date
         }
         Update-AzureFailureTrace @paramUpdateAzureFailureTrace
+
+        $actionJobs += Start-AzVM -Id $target -AsJob
 
     }
     if ($actionJobs | Where-Object { $_ -ne $false }) {
@@ -56,14 +58,31 @@ function Restore-AzureFailureVMShutdown {
     }
     for ($i = 0; $i -lt $TargetResourceId.Count; $i++) {
         if ($actionJobs[$i]) {
-            $paramUpdateAzureFailureTrace = @{
-                ResourceId                = $TargetResourceId[$i]
-                Step                      = $Step
-                Branch                    = $Branch
-                Action                    = $ActionName
-                ActionRestoreCompleteTime = ($actionJobs[$i] | Receive-Job).EndTime
+            try {
+                $jobResult = $actionJobs[$i] | Receive-Job -ErrorAction Stop
+                $paramUpdateAzureFailureTrace = @{
+                    ResourceId                = $TargetResourceId[$i]
+                    Step                      = $Step
+                    Branch                    = $Branch
+                    Action                    = $ActionName
+                    ActionStatus              = "Restored"
+                    ActionRestoreCompleteTime = $jobResult.EndTime
+                }
+                Update-AzureFailureTrace @paramUpdateAzureFailureTrace
             }
-            Update-AzureFailureTrace @paramUpdateAzureFailureTrace
+            catch {
+                Write-PSFMessage -Level Warning -Message "Step ($Step), Branch ($Branch), Target ($($TargetResourceId[$i])): Failed to restore VM. Error: $($_.Exception.Message)."
+                $paramUpdateAzureFailureTrace = @{
+                    ResourceId                = $TargetResourceId[$i]
+                    Step                      = $Step
+                    Branch                    = $Branch
+                    Action                    = $ActionName
+                    ActionStatus              = "RestoreError"
+                    ActionMessage             = 'Failed to restore VM - {0}' -f ($_.Exception.Message -replace "`r`n", "\n")
+                    ActionRestoreCompleteTime = Get-Date
+                }
+                Update-AzureFailureTrace @paramUpdateAzureFailureTrace
+            }
         }
         else {
             continue
