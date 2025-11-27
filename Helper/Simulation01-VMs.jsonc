@@ -8,6 +8,17 @@
                         "name": "Branch 1",
                         "actions": [
                             {
+                                "name": "urn:csci:microsoft:chaosStudio:waitForInput/1.0",
+                                "duration": "PT10M",
+                                "parameters": [
+                                    {
+                                        "key": "RequireResumeOnRestore",
+                                        "value": true
+                                    }
+                                ],
+                                "type": "delay"
+                            },
+                            {
                                 "name": "urn:csci:microsoft:virtualMachine:shutdown/1.0",
                                 "duration": "PT10M",
                                 "parameters": [

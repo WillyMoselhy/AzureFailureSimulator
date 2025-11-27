@@ -59,7 +59,7 @@ Update-PSFModuleManifest -Path .\src\AzureFailureSimulator\AzureFailureSimulator
 
 remove-module AzureFailureSimulator -Force ; import-module .\AzureFailureSimulator
 
-Import-AzureFailureExperiment -Path .\Helper\Simulation01-AKS.jsonc -Verbose
+Import-AzureFailureExperiment -Path .\Helper\Simulation01-VMs.jsonc -Verbose
 
 Invoke-AzureFailureExperiment -Verbose -LogFolderPath "C:\temp\SimulatorLogs" -TraceOutputPath "C:\temp\SimulatorLogs\tracerOutput01.csv"
 

@@ -8,19 +8,19 @@ function Restore-AzureFailureExperiment {
         throw $_
     }
 
-    if($RestoreSkipped){
+    if ($RestoreSkipped) {
         Write-PSFMessage -Level Verbose -Message "Skipped resources will be started during restore."
         $script:RestoreSkipped = $true
     }
     # Go over the steps in reverse order
-    foreach($step in ($script:Steps[($script:Steps.count-1)..0])){
+    foreach ($step in ($script:Steps[($script:Steps.count - 1)..0])) {
         Write-PSFMessage -Level Verbose -Message "Restoring step: $($step.Name)"
         # Go over the branches in reverse order
-        foreach($branch in ($step.Branches[($step.Branches.count-1)..0])){
+        foreach ($branch in ($step.Branches[($step.Branches.count - 1)..0])) {
             Write-PSFMessage -Level Verbose -Message "Restoring branch: $($step.Name) > $branch"
             $branchActions = ($script:Branches | Where-Object { $_.StepName -eq $step.Name -and $_.Name -eq $branch }).Actions
             # Go over the actions in reverse order
-            foreach($action in ($branchActions[($branchActions.count-1)..0])){
+            foreach ($action in ($branchActions[($branchActions.count - 1)..0])) {
                 Write-PSFMessage -Level Verbose -Message "Restoring action: $($step.Name) >  $branch > $($action.Name)"
 
                 $actionDefinition = $script:ActionList[$action.name]
@@ -29,8 +29,10 @@ function Restore-AzureFailureExperiment {
                         Step   = $step.Name
                         Branch = $branch
                     }
-                    if ($actionDefinition.Parameters) {
+                    if ($action.SelectorId) {
                         $paramRestoreAzureFailureAction["TargetResourceId"] = ($script:Selectors[$action.selectorId].Targets | Where-Object { $_.Type -eq $actionDefinition.TargetType }).ResourceId
+                    }
+                    if ($actionDefinition.Parameters) {
                         $paramRestoreAzureFailureAction += $action.Parameters
                     }
                     if ($actionDefinition.SupportsDuration) {
