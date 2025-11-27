@@ -95,7 +95,7 @@ function Invoke-AzureFailureVMScaleSetShutdown {
         if($actionJob.Status -in @("Error", "Skipped")) {
             $actionStatus = $actionJob.Status
         }
-        elseif($actionJob.Job.State -eq "Failed") {
+        elseif ($actionJob.Job.State -eq "Failed") {
             $actionStatus = "Error"
             $actionJob.StatusMessage = 'VMSS shutdown job failed: {0}' -f ($actionJob.Job.Error[0].Exception.Message -replace "`r`n", "\n")
         }
