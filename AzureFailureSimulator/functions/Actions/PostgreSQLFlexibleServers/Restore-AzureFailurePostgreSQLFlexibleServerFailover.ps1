@@ -14,7 +14,7 @@ function Restore-AzureFailurePostgreSQLFlexibleServerFailover {
 
         [bool] $ForcedFailover = $false, #This parameter is ignored in restore operation.
 
-        [string] $ActionName = "urn:csci:microsoft:DBforPostgreSLFlexibleServers:failover/1.0"
+        [string] $ActionName = "urn:csci:microsoft:DBforPostgreSQLFlexibleServers:failover/1.0"
 
     )
 

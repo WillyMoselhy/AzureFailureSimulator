@@ -17,7 +17,7 @@ function Invoke-AzureFailurePostgreSQLFlexibleServerFailover {
 
         [bool] $ForcedFailover = $false,
 
-        [string] $ActionName = "urn:csci:microsoft:DBforPostgreSLFlexibleServers:failover/1.0",
+        [string] $ActionName = "urn:csci:microsoft:DBforPostgreSQLFlexibleServers:failover/1.0",
 
         [bool] $RestoreSkipped = $script:RestoreSkipped
     )

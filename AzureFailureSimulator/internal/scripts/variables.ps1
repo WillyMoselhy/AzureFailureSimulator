@@ -48,7 +48,7 @@ $script:ActionList = @{
         Command          = "Invoke-AzureFailureAKSShutdown"
         RestoreCommand   = "Restore-AzureFailureAKSShutdown"
     }
-    "urn:csci:microsoft:DBforPostgreSLFlexibleServers:failover/1.0" = @{
+    "urn:csci:microsoft:DBforPostgreSQLFlexibleServers:failover/1.0" = @{
         TargetType       = "Microsoft.DBforPostgreSQL/flexibleServers"
         Parameters       = @(
             @{ Name = "ForcedFailover"; Type = "bool"; Required = $false }

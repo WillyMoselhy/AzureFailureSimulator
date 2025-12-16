@@ -31,7 +31,25 @@ function Invoke-AzureFailureAKSShutdown {
     foreach ($target in $TargetResourceId) {
         Write-PSFMessage -Level Verbose -Message "Step ($Step) - Branch ($Branch) - Target ($target): Getting AKS Node Pools"
 
-        $aksCluster = Get-AzAksCluster -Id $target -ErrorAction Stop
+        try {
+            $aksCluster = Get-AzAksCluster -Id $target -ErrorAction Stop
+        }
+        catch {
+            $actionCompleteTime = Get-Date
+            $paramUpdateAzureFailureTrace = @{
+                ResourceId         = $target
+                Step               = $Step
+                Branch             = $Branch
+                Action             = $ActionName
+                ActionStatus       = "Error"
+                ActionMessage      = "Failed to get AKS cluster: $($_.Exception.Message)"
+                ActionTriggerTime  = $actionCompleteTime
+                ActionCompleteTime = $actionCompleteTime
+            }
+            Write-PSFMessage -Level Error -Message "Step ($Step) - Branch ($Branch) - Target ($target): Failed to get AKS cluster. $($_.Exception.Message)"
+            Update-AzureFailureTrace @paramUpdateAzureFailureTrace
+            continue
+        }
 
         $nodeResourceGroup = $aksCluster.NodeResourceGroup
         $agentPoolProfile = $aksCluster.AgentPoolProfiles

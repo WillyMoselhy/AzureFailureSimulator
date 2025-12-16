@@ -1,4 +1,5 @@
 function Update-AzureFailureTrace {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Justification = "Does not change system state.")]
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $false)]

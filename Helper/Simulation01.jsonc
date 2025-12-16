@@ -7,17 +7,7 @@
                     {
                         "name": "Branch 1",
                         "actions": [
-                            {
-                                "name": "urn:csci:microsoft:chaosStudio:waitForInput/1.0",
-                                "duration": "PT10M",
-                                "parameters": [
-                                    {
-                                        "key": "RequireResumeOnRestore",
-                                        "value": false
-                                    }
-                                ],
-                                "type": "delay"
-                            },
+                            // VMs
                             {
                                 "name": "urn:csci:microsoft:virtualMachine:shutdown/1.0",
                                 "duration": "PT10M",
@@ -30,13 +20,25 @@
                                 "selectorId": "VMsSelector",
                                 "type": "continuous"
                             },
+                            // Pause and wait for user
+                            {
+                                "name": "urn:csci:microsoft:chaosStudio:waitForInput/1.0",
+                                "parameters": [
+                                    {
+                                        "key": "RequireResumeOnRestore",
+                                        "value": false
+                                    }
+                                ],
+                                "type": "delay"
+                            },
+                            // Redis Cache
                             {
                                 "type": "discrete",
                                 "name": "urn:csci:microsoft:azureClusteredCacheForRedis:reboot/1.0",
                                 "parameters": [
                                     {
                                         "key": "RebootType",
-                                        "value": "AllNodes"
+                                        "value": "PrimaryNode"
                                     },
                                     {
                                         "key": "ShardId",
@@ -45,6 +47,13 @@
                                 ],
                                 "selectorId": "RedisCache"
                             },
+                            // Time Delay
+                            {
+                                "name": "urn:csci:microsoft:chaosStudio:timedDelay/1.0",
+                                "duration": "PT10S",
+                                "type": "delay"
+                            },
+                            // AKS
                             {
                                 "name": "urn:csci:microsoft:AKS:shutdown/1.0",
                                 "type": "continuous",
@@ -61,8 +70,9 @@
                                     }
                                 ]
                             },
+                            // PostgreSQL Flexible Servers
                             {
-                                "name": "urn:csci:microsoft:DBforPostgreSLFlexibleServers:failover/1.0",
+                                "name": "urn:csci:microsoft:DBforPostgreSQLFlexibleServers:failover/1.0",
                                 "type": "continuous",
                                 "selectorId": "PostgreSQLSelector",
                                 "duration": "PT2M",
@@ -142,6 +152,6 @@
             }
         ]
     },
-    "name": "ShutdownVM",
+    "name": "ShutdownAllResources",
     "apiVersion": "2025-09-22"
 }

@@ -94,14 +94,14 @@ function Invoke-AzureFailureVMShutdown {
     }
 
     foreach ($actionJob in $actionJobs) {
-        if($actionJob.Status -in @("Error", "Skipped")) { #TODO: Handle errors in the $actionJob.Job
+        if ($actionJob.Status -in @("Error", "Skipped")) { #TODO: Handle errors in the $actionJob.Job
             $actionStatus = $actionJob.Status
         }
-        elseif($actionJob.Job.State -eq "Failed") {
+        elseif ($actionJob.Job.State -eq "Failed") {
             $actionStatus = "Error"
             $actionJob.StatusMessage = 'VM shutdown job failed: {0}' -f ($actionJob.Job.Error[0].Exception.Message -replace "`r`n", "\n")
         }
-        else{
+        else {
             $actionStatus = if ($WhatIfPreference) { "WhatIf" } else { "Success" }
         }
         $actionCompleteTime = if ($actionJob.Job) { ($actionJob.Job | Receive-Job).EndTime } else { Get-Date }
