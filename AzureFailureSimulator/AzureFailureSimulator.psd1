@@ -58,6 +58,7 @@
         'Invoke-AzureFailurePostgreSQLFlexibleServerFailover'
         'Invoke-AzureFailureVMScaleSetShutdown'
         'Invoke-AzureFailureVMShutdown'
+        'Invoke-AzureFailureWaitForInput'
         'Register-AzureFailureBranch'
         'Register-AzureFailureSelector'
         'Register-AzureFailureStep'
@@ -66,6 +67,7 @@
         'Restore-AzureFailurePostgreSQLFlexibleServerFailover'
         'Restore-AzureFailureVMScaleSetShutdown'
         'Restore-AzureFailureVMShutdown'
+        'Restore-AzureFailureWaitForInput'
     )
 
     # Cmdlets to export from this module

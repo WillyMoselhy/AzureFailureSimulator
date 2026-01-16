@@ -14,6 +14,8 @@ function Restore-AzureFailureAKSShutdown {
         [string] $Duration,
         [bool] $AbruptShutdown = $false,
 
+        [bool] $DisableAutoScale = $true,
+
         [string] $ActionName = "urn:csci:microsoft:AKS:shutdown/1.0"
 
     )
@@ -21,7 +23,7 @@ function Restore-AzureFailureAKSShutdown {
     Write-PSFMessage -Level Verbose -Message "Step ($Step), Branch ($Branch), Target(s) ($($TargetResourceId -join ', ')): Starting AKS Instances"
 
     foreach ($target in $TargetResourceId) {
-        $aksCluster = Get-AzAksCluster -Id $target
+        $aksCluster = Get-AzAksCluster -Id $target -ErrorAction Stop
 
         $nodeResourceGroup = $aksCluster.NodeResourceGroup
         $agentPoolProfile = $aksCluster.AgentPoolProfiles
@@ -51,37 +53,63 @@ function Restore-AzureFailureAKSShutdown {
             $_.Action -eq $ActionName
         }
         $actionJobs = @()
-        foreach ($nodePool in $agentPoolProfile) {
-            $autoScaleSettings = $targetTrace.TargetDetails.$($nodePool.Name)
-            if ($autoScaleSettings.AutoScaling) {
-                Write-PSFMessage -Level Verbose -Message "Step ($Step) - Branch ($Branch) - Target ($target): Restoring Auto-Scaling on Node Pool: $($nodePool.Name) with MinCount: $($autoScaleSettings.MinCount), MaxCount: $($autoScaleSettings.MaxCount)"
-                $actionJobs += Update-AzAksNodePool -ClusterObject $aksCluster -Name $nodePool.Name -EnableAutoScaling:$true -MinCount $autoScaleSettings.MinCount -MaxCount $autoScaleSettings.MaxCount -AsJob
+        if ($targetTrace.ActionStatus -eq "Skipped") {
+            Write-PSFMessage -Level Verbose -Message "Step ($Step), Branch ($Branch), Target ($target): Action was previously skipped. Skipping restore."
+            $actionsJobs += $false
+
+        }
+        else {
+            # Update trace to Restoring status
+            $paramUpdateAzureFailureTrace = @{
+                ResourceId               = $target
+                Step                     = $Step
+                Branch                   = $Branch
+                Action                   = $ActionName
+                ActionStatus             = "Restoring"
+                ActionRestoreTriggerTime = Get-Date
             }
-            else {
-                Write-PSFMessage -Level Verbose -Message "Step ($Step) - Branch ($Branch) - Target ($target): Auto-Scaling was not enabled on Node Pool: $($nodePool.Name). No action taken."
-                $actionJobs += $false
+            Update-AzureFailureTrace @paramUpdateAzureFailureTrace
+
+            try {
+                foreach ($nodePool in $agentPoolProfile) {
+                    $autoScaleSettings = $targetTrace.TargetDetails.$($nodePool.Name)
+                    if ($autoScaleSettings.AutoScaling) {
+                        Write-PSFMessage -Level Verbose -Message "Step ($Step) - Branch ($Branch) - Target ($target): Restoring Auto-Scaling on Node Pool: $($nodePool.Name) with MinCount: $($autoScaleSettings.MinCount), MaxCount: $($autoScaleSettings.MaxCount)"
+                        $actionJobs += Update-AzAksNodePool -ClusterObject $aksCluster -Name $nodePool.Name -EnableAutoScaling:$true -MinCount $autoScaleSettings.MinCount -MaxCount $autoScaleSettings.MaxCount -AsJob
+                    }
+                    else {
+                        Write-PSFMessage -Level Verbose -Message "Step ($Step) - Branch ($Branch) - Target ($target): Auto-Scaling was not enabled on Node Pool: $($nodePool.Name). No action taken."
+                        $actionJobs += $false
+                    }
+                }
+                if ($actionJobs | Where-Object { $_ -ne $false }) {
+                    Write-PSFMessage -Level Verbose -Message "Waiting for AKS Node Pool restore jobs to complete"
+                    $null = Wait-Job -Job ($actionJobs | Where-Object { $_ -ne $false })
+                    Write-PSFMessage -Level Verbose -Message "AKS Node Pool restore jobs complete"
+                }
+                $paramUpdateAzureFailureTrace = @{
+                    ResourceId                = $target
+                    Step                      = $Step
+                    Branch                    = $Branch
+                    Action                    = $ActionName
+                    ActionStatus              = "Restored"
+                    ActionRestoreCompleteTime = Get-Date
+                }
+                Update-AzureFailureTrace @paramUpdateAzureFailureTrace
+            }
+            catch {
+                Write-PSFMessage -Level Warning -Message "Step ($Step), Branch ($Branch), Target ($target): Failed to restore AKS cluster. Error: $($_.Exception.Message)."
+                $paramUpdateAzureFailureTrace = @{
+                    ResourceId                = $target
+                    Step                      = $Step
+                    Branch                    = $Branch
+                    Action                    = $ActionName
+                    ActionStatus              = "RestoreError"
+                    ActionMessage             = 'Failed to restore AKS cluster - {0}' -f ($_.Exception.Message -replace "`r`n", "\n")
+                    ActionRestoreCompleteTime = Get-Date
+                }
+                Update-AzureFailureTrace @paramUpdateAzureFailureTrace
             }
         }
-        $paramUpdateAzureFailureTrace = @{
-            ResourceId               = $target
-            Step                     = $Step
-            Branch                   = $Branch
-            Action                   = $ActionName
-            ActionRestoreTriggerTime = Get-Date
-        }
-        Update-AzureFailureTrace @paramUpdateAzureFailureTrace
-        if ($actionJobs | Where-Object { $_ -ne $false }) {
-            Write-PSFMessage -Level Verbose -Message "Waiting for AKS Node Pool restore jobs to complete"
-            $null = Wait-Job -Job ($actionJobs | Where-Object { $_ -ne $false })
-            Write-PSFMessage -Level Verbose -Message "AKS Node Pool restore jobs complete"
-        }
-        $paramUpdateAzureFailureTrace = @{
-            ResourceId                = $target
-            Step                      = $Step
-            Branch                    = $Branch
-            Action                    = $ActionName
-            ActionRestoreCompleteTime = Get-Date
-        }
-        Update-AzureFailureTrace @paramUpdateAzureFailureTrace
     }
 }

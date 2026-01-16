@@ -57,17 +57,17 @@ $strings = (Get-ChildItem -Path .\src\AzureFailureSimulator\functions -Recurse -
 Update-PSFModuleManifest -Path .\src\AzureFailureSimulator\AzureFailureSimulator.psd1 -FunctionsToExport $strings
 
 
+remove-module AzureFailureSimulator -Force ; import-module .\AzureFailureSimulator
 
+Import-AzureFailureExperiment -Path .\Helper\Simulation01-VMs.jsonc -Verbose
 
-
-remove-module AzureFailureSimulator -Force ; import-module .\src\AzureFailureSimulator
-
-Import-AzureFailureExperiment -Path .\src\Helper\Simulation01-VMs-Failure.jsonc -verbose
-
-Invoke-AzureFailureExperiment -Verbose -LogFolderPath "C:\temp\SimulatorLogs" -TraceOutputPath "C:\temp\SimulatorLogs\tracerOutput01.csv" -WhatIf
+Invoke-AzureFailureExperiment -Verbose -LogFolderPath "C:\temp\SimulatorLogs" -TraceOutputPath "C:\temp\SimulatorLogs\tracerOutput01.csv"
 
 Restore-AzureFailureExperiment -Verbose -RestoreSkipped
 
+
+# ERRORS
+* We Are not authenticated to Azure for example
 
 
 # Find all the get-az* commands and list their module

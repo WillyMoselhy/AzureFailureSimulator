@@ -4,12 +4,14 @@ function Register-AzureFailureSelector {
         [Parameter(Mandatory = $true, Position = 0, ValueFromPipelineByPropertyName = $true)]
         [string] $Id,
 
-        [Parameter(Mandatory = $true, ParameterSetName = "Query", Position = 2, ValueFromPipelineByPropertyName = $true)]
-        [string] $QueryString,
+        #[Parameter(Mandatory = $true, ParameterSetName = "Query", Position = 2, ValueFromPipelineByPropertyName = $true)]
+        #[string] $QueryString,
+        # For future use
 
         #Parameter to accept array of subscription Ids. Parameter name is plural to align with Chaos studio inputs.
-        [Parameter(Mandatory = $true, ParameterSetName = "Query", Position = 3, ValueFromPipelineByPropertyName = $true)]
-        [string[]] $SubscriptionIds,
+        #[Parameter(Mandatory = $true, ParameterSetName = "Query", Position = 3, ValueFromPipelineByPropertyName = $true)]
+        #[string[]] $SubscriptionIds,
+        # For future use
 
         #Parameter to accept list of resource Ids. Parameter name is plural to align with Chaos studio inputs.
         [Parameter(Mandatory = $true, ParameterSetName = "List", Position = 2, ValueFromPipelineByPropertyName = $true)]

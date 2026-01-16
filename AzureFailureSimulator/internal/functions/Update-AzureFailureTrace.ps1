@@ -1,4 +1,5 @@
 function Update-AzureFailureTrace {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Justification = "Does not change system state.")]
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $false)]
@@ -20,10 +21,11 @@ function Update-AzureFailureTrace {
         [string] $Action,
 
         [Parameter(Mandatory = $false)]
-        [bool] $ActionSkipped,
+        [ValidateSet("InProgress", "Skipped", "WhatIf" ,"Success", "Error","Restoring", "Restored", "RestoreError")]
+        [string] $ActionStatus,
 
         [Parameter(Mandatory = $false)]
-        [string] $ActionSkipMessage,
+        [string] $ActionMessage,
 
         [Parameter(Mandatory = $false)]
         [DateTime] $ActionTriggerTime,
@@ -46,11 +48,14 @@ function Update-AzureFailureTrace {
         $_.Action -eq $Action
     }
     if ($existingEntry) {
+        $existingEntry.actionStatus = $ActionStatus
+        $existingEntry.actionMessage = $ActionMessage
+
         if ($ActionTriggerTime) {
             $existingEntry.ActionTriggerTime = $ActionTriggerTime
         }
         if ($ActionCompleteTime) {
-            if ($existingEntry.ActionSkipped) {
+            if ($existingEntry.ActionStatus -eq "Skipped") {
                 $existingEntry.ActionCompleteTime = $existingEntry.ActionTriggerTime
             }
             else {
@@ -83,8 +88,8 @@ function Update-AzureFailureTrace {
             TargetDetails             = $TargetDetails
             TargetDetailsJson         = if ($TargetDetails) { $TargetDetails | ConvertTo-Json -Compress -Depth 3 } else { $null }
             Action                    = $Action
-            ActionSkipped             = $ActionSkipped
-            ActionSkipMessage         = $ActionSkipMessage
+            ActionStatus              = $ActionStatus
+            ActionMessage             = $ActionMessage
             ActionTriggerTime         = if ($ActionTriggerTime) { $ActionTriggerTime }         else { $null }
             ActionCompleteTime        = if ($ActionCompleteTime) { $ActionCompleteTime }        else { $null }
             ActionDuration            = $null

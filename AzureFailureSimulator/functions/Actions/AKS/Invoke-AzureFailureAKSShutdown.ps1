@@ -21,6 +21,7 @@ function Invoke-AzureFailureAKSShutdown {
         [string] $Duration,
         [string[]] $Filter,
         [bool] $AbruptShutdown = $false,
+        [bool] $DisableAutoScale = $true,
 
         [string] $ActionName = "urn:csci:microsoft:AKS:shutdown/1.0"
 
@@ -30,7 +31,25 @@ function Invoke-AzureFailureAKSShutdown {
     foreach ($target in $TargetResourceId) {
         Write-PSFMessage -Level Verbose -Message "Step ($Step) - Branch ($Branch) - Target ($target): Getting AKS Node Pools"
 
-        $aksCluster = Get-AzAksCluster -Id $target
+        try {
+            $aksCluster = Get-AzAksCluster -Id $target -ErrorAction Stop
+        }
+        catch {
+            $actionCompleteTime = Get-Date
+            $paramUpdateAzureFailureTrace = @{
+                ResourceId         = $target
+                Step               = $Step
+                Branch             = $Branch
+                Action             = $ActionName
+                ActionStatus       = "Error"
+                ActionMessage      = "Failed to get AKS cluster: $($_.Exception.Message)"
+                ActionTriggerTime  = $actionCompleteTime
+                ActionCompleteTime = $actionCompleteTime
+            }
+            Write-PSFMessage -Level Error -Message "Step ($Step) - Branch ($Branch) - Target ($target): Failed to get AKS cluster. $($_.Exception.Message)"
+            Update-AzureFailureTrace @paramUpdateAzureFailureTrace
+            continue
+        }
 
         $nodeResourceGroup = $aksCluster.NodeResourceGroup
         $agentPoolProfile = $aksCluster.AgentPoolProfiles
@@ -38,50 +57,67 @@ function Invoke-AzureFailureAKSShutdown {
         Write-PSFMessage -Level Verbose -Message "Step ($Step) - Branch ($Branch) - Target ($target): Found $($agentPoolProfile.Count) Node Pools in AKS Cluster. ($($agentPoolProfile.Name -join ', '))"
 
         $autoScaleTargetDetails = @{}
-        foreach ($nodePool in $agentPoolProfile) {
-            $autoScaleTargetDetails[$nodePool.Name] = @{
-                AutoScaling = $nodePool.EnableAutoScaling
-                MinCount    = $nodePool.MinCount
-                MaxCount    = $nodePool.MaxCount
-            }
-            $actionJobs = @()
-            if ($nodePool.EnableAutoScaling) {
-                Write-PSFMessage -Level Verbose -Message "Step ($Step) - Branch ($Branch) - Target ($target): Disabling Auto-Scaling on Node Pool: $($nodePool.Name)"
-                if ($PSCmdlet.ShouldProcess("Disable Auto-Scaling on Node Pool: $($nodePool.Name)")) {
-                    $actionJobs += Update-AzAksNodePool -ClusterObject $aksCluster -Name $nodePool.Name -EnableAutoScaling:$false -AsJob
+        if ($DisableAutoScale) {
+            foreach ($nodePool in $agentPoolProfile) {
+                $autoScaleTargetDetails[$nodePool.Name] = @{
+                    AutoScaling = $nodePool.EnableAutoScaling
+                    MinCount    = $nodePool.MinCount
+                    MaxCount    = $nodePool.MaxCount
+                }
+                $actionJobs = @()
+                if ($nodePool.EnableAutoScaling) {
+                    Write-PSFMessage -Level Verbose -Message "Step ($Step) - Branch ($Branch) - Target ($target): Disabling Auto-Scaling on Node Pool: $($nodePool.Name)"
+                    if ($PSCmdlet.ShouldProcess("Disable Auto-Scaling on Node Pool: $($nodePool.Name)")) {
+                        $actionJobs += Update-AzAksNodePool -ClusterObject $aksCluster -Name $nodePool.Name -EnableAutoScaling:$false -AsJob
+                    }
                 }
             }
-        }
-        # For AKS Nodes we are updating AutoScale on all pools as one action in the trace.
-        $paramUpdateAzureFailureTrace = @{
-            Step              = $Step
-            Branch            = $Branch
-            ResourceId        = $target
-            TargetDetails     = $autoScaleTargetDetails
-            Action            = $ActionName
-            ActionSkipped     = $false
-            ActionSkipMessage = ""
-            ActionTriggerTime = Get-Date
-        }
-        Update-AzureFailureTrace @paramUpdateAzureFailureTrace
-        if ($actionJobs) {
-            Write-PSFMessage -Level Verbose -Message "Waiting for AKS Node Pool Auto-Scaling disable jobs to complete"
-            $null = Wait-Job -Job ($actionJobs | Where-Object { $_ -ne $false })
-            Write-PSFMessage -Level Verbose -Message "AKS Node Pool Auto-Scaling disable jobs complete"
-        }
+
+            # For AKS Nodes we are updating AutoScale on all pools as one action in the trace.
+            $paramUpdateAzureFailureTrace = @{
+                Step              = $Step
+                Branch            = $Branch
+                ResourceId        = $target
+                TargetDetails     = $autoScaleTargetDetails
+                Action            = $ActionName
+                ActionStatus      = "InProgress"
+                ActionMessage     = ""
+                ActionTriggerTime = Get-Date
+            }
+            Update-AzureFailureTrace @paramUpdateAzureFailureTrace
+            if ($actionJobs) {
+                Write-PSFMessage -Level Verbose -Message "Waiting for AKS Node Pool Auto-Scaling disable jobs to complete"
+                $null = Wait-Job -Job ($actionJobs | Where-Object { $_ -ne $false })
+                Write-PSFMessage -Level Verbose -Message "AKS Node Pool Auto-Scaling disable jobs complete"
+            }
 
 
-        $actionCompleteTime = Get-Date
-        $paramUpdateAzureFailureTrace = @{
-            ResourceId         = $target
-            Step               = $Step
-            Branch             = $Branch
-            Action             = $actionName
-            ActionCompleteTime = $actionCompleteTime
+            $actionCompleteTime = Get-Date
+            $paramUpdateAzureFailureTrace = @{
+                ResourceId         = $target
+                Step               = $Step
+                Branch             = $Branch
+                Action             = $actionName
+                ActionStatus       = if ($WhatIfPreference) { "WhatIf" } else { "Success" }
+                ActionCompleteTime = $actionCompleteTime
+            }
+            Update-AzureFailureTrace @paramUpdateAzureFailureTrace
+
         }
-        Update-AzureFailureTrace @paramUpdateAzureFailureTrace
-
-
+        else {
+            $actionCompleteTime = Get-Date
+            $paramUpdateAzureFailureTrace = @{
+                ResourceId         = $target
+                Step               = $Step
+                Branch             = $Branch
+                Action             = $actionName
+                ActionStatus       = "Skipped"
+                ActionMessage      = "Auto-Scaling disable skipped as per configuration"
+                ActionTriggerTime  = $actionCompleteTime
+                ActionCompleteTime = $actionCompleteTime
+            }
+            Update-AzureFailureTrace @paramUpdateAzureFailureTrace
+        }
 
         # Utilize VMSS shutdown action to shutdown the instances in each node pool
         $vmssResourceIds = ($agentPoolProfile.Name | ForEach-Object { Get-AzResource -ResourceGroupName $nodeResourceGroup -ResourceType 'Microsoft.Compute/virtualMachineScaleSets' -TagName 'aks-managed-poolName' -TagValue $_ }).ResourceId

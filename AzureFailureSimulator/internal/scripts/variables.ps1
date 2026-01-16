@@ -41,13 +41,14 @@ $script:ActionList = @{
         TargetType       = "Microsoft.ContainerService/managedClusters"
         Parameters       = @(
             @{ Name = "abruptShutdown"; Type = "bool"; Required = $false }
+            @{ Name = "disableAutoScale"; Type = "bool"; Required = $false }
         )
         SupportsDuration = $true
         SupportsFilter   = $true
         Command          = "Invoke-AzureFailureAKSShutdown"
         RestoreCommand   = "Restore-AzureFailureAKSShutdown"
     }
-    "urn:csci:microsoft:DBforPostgreSLFlexibleServers:failover/1.0" = @{
+    "urn:csci:microsoft:DBforPostgreSQLFlexibleServers:failover/1.0" = @{
         TargetType       = "Microsoft.DBforPostgreSQL/flexibleServers"
         Parameters       = @(
             @{ Name = "ForcedFailover"; Type = "bool"; Required = $false }
@@ -60,7 +61,7 @@ $script:ActionList = @{
     "urn:csci:microsoft:azureClusteredCacheForRedis:reboot/1.0" = @{
         TargetType       = "Microsoft.Cache/Redis"
         Parameters       = @(
-            @{ Name = "RebootType"; Type = "string"; Required = $true } #TODO: Add ValidateSet
+            @{ Name = "RebootType"; Type = "string"; Required = $true }
             @{ Name = "ShardId"; Type = "string"; Required = $false }
         )
         SupportsDuration = $false
@@ -72,5 +73,14 @@ $script:ActionList = @{
         Parameters       = @()
         SupportsDuration = $true
         Command          = "Invoke-AzureFailureDelay"
+    }
+    "urn:csci:microsoft:chaosStudio:waitForInput/1.0" = @{
+        TargetType       = "waitForInput"
+        Parameters       = @(
+            @{ Name = "RequireResumeOnRestore"; Type = "bool"; Required = $false }
+        )
+        SupportsDuration = $false
+        Command          = "Invoke-AzureFailureWaitForInput"
+        RestoreCommand   = "Restore-AzureFailureWaitForInput"
     }
 }

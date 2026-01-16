@@ -1,4 +1,5 @@
 function Set-AzureFailureLogConfig {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Justification = "Does not change system state.")]
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]

@@ -23,7 +23,7 @@
                                 "selectorId": "RedisCache"
                             },
                             {
-                                "name": "urn:csci:microsoft:DBforPostgreSLFlexibleServers:failover/1.0",
+                                "name": "urn:csci:microsoft:DBforPostgreSQLFlexibleServers:failover/1.0",
                                 "type": "continuous",
                                 "selectorId": "PostgreSQLSelector",
                                 "duration": "PT2M",
