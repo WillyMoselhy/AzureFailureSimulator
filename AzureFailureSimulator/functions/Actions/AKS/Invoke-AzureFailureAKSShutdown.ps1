@@ -19,13 +19,25 @@ function Invoke-AzureFailureAKSShutdown {
         [string[]] $TargetResourceId,
 
         [string] $Duration,
-        [string[]] $Filter,
+        [object] $Filter,
         [bool] $AbruptShutdown = $false,
         [bool] $DisableAutoScale = $true,
 
         [string] $ActionName = "urn:csci:microsoft:AKS:shutdown/1.0"
 
     )
+
+    $filterZones = $null
+    $filterNodePools = $null
+    if ($Filter) {
+        if ($Filter -is [string] -or $Filter -is [string[]]) {
+            $filterZones = [string[]] $Filter
+        }
+        else {
+            $filterZones = [string[]] $Filter.Zones
+            $filterNodePools = [string[]] $Filter.NodePool
+        }
+    }
 
 
     foreach ($target in $TargetResourceId) {
@@ -53,8 +65,37 @@ function Invoke-AzureFailureAKSShutdown {
 
         $nodeResourceGroup = $aksCluster.NodeResourceGroup
         $agentPoolProfile = $aksCluster.AgentPoolProfiles
+        Write-PSFMessage -Level Verbose -Message "Step ($Step) - Branch ($Branch) - Target ($target): Found $(@($agentPoolProfile).Count) Node Pools in AKS Cluster. ($($agentPoolProfile.Name -join ', '))"
 
-        Write-PSFMessage -Level Verbose -Message "Step ($Step) - Branch ($Branch) - Target ($target): Found $($agentPoolProfile.Count) Node Pools in AKS Cluster. ($($agentPoolProfile.Name -join ', '))"
+        if ($filterNodePools) {
+            $requestedNodePools = $filterNodePools | Where-Object { $_ }
+            $availableNodePools = $agentPoolProfile.Name
+            $missingNodePools = $requestedNodePools | Where-Object { $_ -notin $availableNodePools }
+            if ($missingNodePools) {
+                Write-PSFMessage -Level Warning -Message "Step ($Step) - Branch ($Branch) - Target ($target): Requested AKS node pool(s) not found: $($missingNodePools -join ', ')."
+            }
+
+            $agentPoolProfile = $agentPoolProfile | Where-Object { $_.Name -in $requestedNodePools }
+
+            if (-not $agentPoolProfile) {
+                $actionCompleteTime = Get-Date
+                $paramUpdateAzureFailureTrace = @{
+                    ResourceId         = $target
+                    Step               = $Step
+                    Branch             = $Branch
+                    Action             = $ActionName
+                    ActionStatus       = "Skipped"
+                    ActionMessage      = "No matching AKS node pools found for filter: $($requestedNodePools -join ', ')."
+                    ActionTriggerTime  = $actionCompleteTime
+                    ActionCompleteTime = $actionCompleteTime
+                }
+                Update-AzureFailureTrace @paramUpdateAzureFailureTrace
+                continue
+            }
+
+            Write-PSFMessage -Level Verbose -Message "Step ($Step) - Branch ($Branch) - Target ($target): Filtered to $(@($agentPoolProfile).Count) Node Pools in AKS Cluster. ($($agentPoolProfile.Name -join ', '))"
+        }
+
 
         $autoScaleTargetDetails = @{}
         if ($DisableAutoScale) {
@@ -97,7 +138,7 @@ function Invoke-AzureFailureAKSShutdown {
                 ResourceId         = $target
                 Step               = $Step
                 Branch             = $Branch
-                Action             = $actionName
+                Action             = $ActionName
                 ActionStatus       = if ($WhatIfPreference) { "WhatIf" } else { "Success" }
                 ActionCompleteTime = $actionCompleteTime
             }
@@ -110,7 +151,7 @@ function Invoke-AzureFailureAKSShutdown {
                 ResourceId         = $target
                 Step               = $Step
                 Branch             = $Branch
-                Action             = $actionName
+                Action             = $ActionName
                 ActionStatus       = "Skipped"
                 ActionMessage      = "Auto-Scaling disable skipped as per configuration"
                 ActionTriggerTime  = $actionCompleteTime
@@ -128,9 +169,9 @@ function Invoke-AzureFailureAKSShutdown {
             Branch           = $Branch
             TargetResourceId = $vmssResourceIds
             Duration         = $Duration
-            Filter           = $Filter
+            Filter           = $filterZones
             AbruptShutdown   = $AbruptShutdown
-            ActionName       = $actionName
+            ActionName       = $ActionName
         }
         Invoke-AzureFailureVMScaleSetShutdown @paramInvokeAzureFailureVMScaleSetShutdown
     }

@@ -52,7 +52,6 @@
                 "filter": {
                     "parameters": {
                         "zones": [
-                            "2",
                             "1"
                         ]
                     },
