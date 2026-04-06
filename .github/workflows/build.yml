@@ -24,6 +24,10 @@ jobs:
       - name: Build and Publish
         env:
           APIKey: ${{ secrets.APIKey }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         shell: pwsh
         run: |
-          ./build/vsts-build.ps1 -ApiKey $env:APIKey -AutoVersion
+          $bumpMinor = $env:COMMIT_MESSAGE -match '^feat(\(.+\))?:'
+          $params = @{ ApiKey = $env:APIKey; AutoVersion = $true }
+          if ($bumpMinor) { $params['BumpMinor'] = $true }
+          ./build/vsts-build.ps1 @params

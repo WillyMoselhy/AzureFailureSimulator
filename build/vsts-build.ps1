@@ -21,6 +21,9 @@ param (
 	$AutoVersion,
 
 	[switch]
+	$BumpMinor,
+
+	[switch]
 	$Build
 )
 
@@ -106,9 +109,14 @@ if ($AutoVersion)
 	{
 		Stop-PSFFunction -Message "Couldn't find AzureFailureSimulator on repository $($Repository)" -EnableException $true
 	}
-	$newBuildNumber = $remoteVersion.Build + 1
-	[version]$localVersion = (Import-PowerShellDataFile -Path "$($publishDir.FullName)\AzureFailureSimulator\AzureFailureSimulator.psd1").ModuleVersion
-	Update-ModuleManifest -Path "$($publishDir.FullName)\AzureFailureSimulator\AzureFailureSimulator.psd1" -ModuleVersion "$($localVersion.Major).$($localVersion.Minor).$($newBuildNumber)"
+	if ($BumpMinor) {
+		$newMinorNumber = $remoteVersion.Minor + 1
+		Update-ModuleManifest -Path "$($publishDir.FullName)\AzureFailureSimulator\AzureFailureSimulator.psd1" -ModuleVersion "$($remoteVersion.Major).$($newMinorNumber).0"
+	} else {
+		$newBuildNumber = $remoteVersion.Build + 1
+		[version]$localVersion = (Import-PowerShellDataFile -Path "$($publishDir.FullName)\AzureFailureSimulator\AzureFailureSimulator.psd1").ModuleVersion
+		Update-ModuleManifest -Path "$($publishDir.FullName)\AzureFailureSimulator\AzureFailureSimulator.psd1" -ModuleVersion "$($localVersion.Major).$($localVersion.Minor).$($newBuildNumber)"
+	}
 }
 #endregion Updating the Module Version
 

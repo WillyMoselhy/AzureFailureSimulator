@@ -38,16 +38,6 @@
                         "type": "ChaosTarget"
                     }
                 ]
-            },
-            {
-                "id": "Selector2",
-                "type": "List",
-                "targets": [
-                    {
-                        "id": "/subscriptions/44194899-7181-423a-9dbc-278d99a7683a/resourceGroups/ADCB-Lab/providers/Microsoft.Compute/virtualMachines/hyper-vs",
-                        "type": "ChaosTarget"
-                    }
-                ]
             }
         ]
     },

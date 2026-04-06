@@ -41,7 +41,12 @@
                 "filter": {
                     "parameters": {
                         "zones": [
-                            "1"
+                            "1","3"
+                        ],
+                        "nodepool": [
+                            "agentpool",
+                            "userpool",
+                            "doesnotexist"
                         ]
                     },
                     "type": "Simple"

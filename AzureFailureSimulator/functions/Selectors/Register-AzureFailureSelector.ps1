@@ -19,7 +19,7 @@ function Register-AzureFailureSelector {
 
         #Parameter to accept filter hashtable for VMSS. This will be used only when the target type is VMSS.
         [Parameter(Mandatory = $false, ParameterSetName = "List", Position = 3, ValueFromPipelineByPropertyName = $true)]
-        [PSCustomObject] $filter
+        [PSCustomObject] $Filter
 
     )
     process {
@@ -71,30 +71,55 @@ function Register-AzureFailureSelector {
         }
 
         # Register filters
-        if($filter){
+        if($Filter){
             Write-PSFMessage -Level Verbose -Message "Validating filter for selector Id: $($Id)"
             if($targetObjects[0].Type -notin ("Microsoft.Compute/virtualMachineScaleSets","Microsoft.DBforPostgreSQL/flexibleServers","Microsoft.ContainerService/managedClusters")){ # TODO: Find a Better way to check if the target type supports filter
                 throw "Selector Id: $($Id) - Filter can only be applied when the target type is 'Microsoft.Compute/virtualMachineScaleSets' or 'Microsoft.DBforPostgreSQL/flexibleServers' or 'Microsoft.ContainerService/managedClusters'."
             }
-            if(-not $filter.parameters.zones){
-                throw "Selector Id: $($Id) - Filter must have a 'parameters.zones' key."
+            if($targetObjects[0].Type -eq "Microsoft.ContainerService/managedClusters"){
+                $filterZones = $Filter.parameters.zones
+                $filterNodePool = $Filter.parameters.nodepool
+
+                if(-not $filterZones -and -not $filterNodePool){
+                    throw "Selector Id: $($Id) - AKS filter must have at least one of 'parameters.zones' or 'parameters.nodepool'."
+                }
+
+                if($filterZones){
+                    $filterZones = [string[]]$filterZones
+                    Write-PSFMessage -Level Verbose -Message "Selector Id: $($Id) - Applying AKS filter zones: $($filterZones -join ", ")"
+                }
+                if($filterNodePool){
+                    $filterNodePool = [string[]]$filterNodePool
+                    Write-PSFMessage -Level Verbose -Message "Selector Id: $($Id) - Applying AKS filter node pools: $($filterNodePool -join ", ")"
+                }
+
+                $selectorFilter = [PSCustomObject]@{
+                    Zones    = $filterZones
+                    NodePool = $filterNodePool
+                }
             }
-            $filterZones = $filter.parameters.zones
-            Write-PSFMessage -Level Verbose -Message "Selector Id: $($Id) - Applying filter zones: $($filterZones -join ", ")"
+            else {
+                if(-not $Filter.parameters.zones){
+                    throw "Selector Id: $($Id) - Filter must have a 'parameters.zones' key."
+                }
+                $filterZones = [string[]]$Filter.parameters.zones
+                Write-PSFMessage -Level Verbose -Message "Selector Id: $($Id) - Applying filter zones: $($filterZones -join ", ")"
+                $selectorFilter = $filterZones
+            }
         }
         elseif($targetObjects[0].Type -eq "Microsoft.Compute/virtualMachineScaleSets"){
             Write-PSFMessage -Level Warning -Message "Selector Id: $($Id) - No filter applied for VMScaleSet. All instances in the scale set will be targeted."
-            $filterZones = $null
+            $selectorFilter = $null
         }
         else{
-            $filterZones = $null
+            $selectorFilter = $null
         }
 
 
         # TODO: Add logic for the Query parameter set
         $script:Selectors[$Id] = [PSCustomObject]@{
             Targets = $targetObjects
-            Filter = $filterZones
+            Filter = $selectorFilter
         }
     }
 
