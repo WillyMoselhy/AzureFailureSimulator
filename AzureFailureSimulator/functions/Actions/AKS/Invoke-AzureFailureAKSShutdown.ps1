@@ -139,6 +139,7 @@ function Invoke-AzureFailureAKSShutdown {
                 Step               = $Step
                 Branch             = $Branch
                 Action             = $ActionName
+
                 ActionStatus       = if ($WhatIfPreference) { "WhatIf" } else { "Success" }
                 ActionCompleteTime = $actionCompleteTime
             }
@@ -152,6 +153,7 @@ function Invoke-AzureFailureAKSShutdown {
                 Step               = $Step
                 Branch             = $Branch
                 Action             = $ActionName
+
                 ActionStatus       = "Skipped"
                 ActionMessage      = "Auto-Scaling disable skipped as per configuration"
                 ActionTriggerTime  = $actionCompleteTime
