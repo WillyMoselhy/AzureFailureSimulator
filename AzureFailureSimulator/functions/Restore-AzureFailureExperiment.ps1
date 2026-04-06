@@ -1,7 +1,9 @@
 function Restore-AzureFailureExperiment {
     [CmdletBinding()]
     param (
-        [switch] $RestoreSkipped
+        [switch] $RestoreSkipped,
+        
+        [switch] $SkipPaaSRestore
     )
 
     trap {
@@ -12,6 +14,12 @@ function Restore-AzureFailureExperiment {
         Write-PSFMessage -Level Verbose -Message "Skipped resources will be started during restore."
         $script:RestoreSkipped = $true
     }
+    
+    # Define PaaS resource types that can be skipped during restore
+    $paasResourceTypes = @(
+        "Microsoft.DBforPostgreSQL/flexibleServers"
+        "Microsoft.Cache/Redis"
+    )
     # Go over the steps in reverse order
     foreach ($step in ($script:Steps[($script:Steps.count - 1)..0])) {
         Write-PSFMessage -Level Verbose -Message "Restoring step: $($step.Name)"
@@ -24,6 +32,13 @@ function Restore-AzureFailureExperiment {
                 Write-PSFMessage -Level Verbose -Message "Restoring action: $($step.Name) >  $branch > $($action.Name)"
 
                 $actionDefinition = $script:ActionList[$action.name]
+                
+                # Check if this is a PaaS resource and if PaaS restore should be skipped
+                if ($SkipPaaSRestore -and $actionDefinition.TargetType -and $actionDefinition.TargetType -in $paasResourceTypes) {
+                    Write-PSFMessage -Level Warning -Message "Skipping PaaS restore for action: $($step.Name) > $branch > $($action.Name) (TargetType: $($actionDefinition.TargetType))"
+                    continue
+                }
+                
                 if ($actionDefinition.RestoreCommand) {
                     $paramRestoreAzureFailureAction = @{
                         Step   = $step.Name
