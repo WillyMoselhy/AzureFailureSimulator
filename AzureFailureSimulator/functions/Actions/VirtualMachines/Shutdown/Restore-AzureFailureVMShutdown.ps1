@@ -52,8 +52,11 @@ function Restore-AzureFailureVMShutdown {
     }
     if ($actionJobs | Where-Object { $_ -ne $false }) {
 
-        Write-PSFMessage -Level Verbose -Message "Waiting for VM start jobs to complete"
-        $null = Wait-Job -Job ($actionJobs | Where-Object { $_ -ne $false })
+        $jobsToWaitFor = ($actionJobs | Where-Object { $_ -ne $false })
+        Write-PSFMessage -Level Verbose -Message "Waiting for {0} VM start jobs to complete" -StringValues $jobsToWaitFor.Count
+
+        Wait-AzureFailureJob -Jobs $jobsToWaitFor -Activity "Starting VMs"
+
         Write-PSFMessage -Level Verbose -Message "VM start jobs complete"
     }
     for ($i = 0; $i -lt $TargetResourceId.Count; $i++) {

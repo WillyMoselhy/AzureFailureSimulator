@@ -85,16 +85,16 @@ function Invoke-AzureFailureVMShutdown {
 
     $jobsToWaitFor = ($actionJobs | Where-Object { $_.Job -ne $false }).Job
     if ($jobsToWaitFor) {
-
         Write-PSFMessage -Level Verbose -Message "Waiting for {0} VM shutdown jobs to complete" -StringValues $jobsToWaitFor.Count
 
-        $null = Wait-Job -Job $jobsToWaitFor
+        Wait-AzureFailureJob -Jobs $jobsToWaitFor -Activity "Shutting down VMs"
 
         Write-PSFMessage -Level Verbose -Message "VM shutdown jobs complete"
     }
 
     foreach ($actionJob in $actionJobs) {
-        if ($actionJob.Status -in @("Error", "Skipped")) { #TODO: Handle errors in the $actionJob.Job
+        if ($actionJob.Status -in @("Error", "Skipped")) {
+            #TODO: Handle errors in the $actionJob.Job
             $actionStatus = $actionJob.Status
         }
         elseif ($actionJob.Job.State -eq "Failed") {
