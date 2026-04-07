@@ -12,7 +12,7 @@ function Register-AzureFailureStep {
     process {
         # Validate Step Name is unique
         Write-PSFMessage -Level Verbose -Message "Validating step: $($Name)"
-        if ($script:Steps.$Name) {
+        if ($script:Steps.Name -contains $Name) {
             throw "Step ($($Name)): Already registered. Step Names must be unique."
         }
         # Validate Branches have unique names
