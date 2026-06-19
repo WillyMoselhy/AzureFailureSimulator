@@ -3,7 +3,7 @@
     RootModule        = 'AzureFailureSimulator.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '1.0.0'
+    ModuleVersion     = '1.2.1'
 
     # ID used to uniquely identify this module
     GUID              = 'ae385be3-1cbb-46ba-9525-84d2f092a07f'
@@ -26,12 +26,12 @@
     # Modules that must be imported into the global environment prior to importing
     # this module
     RequiredModules   = @(
-        @{ ModuleName = 'PSFramework'   ; ModuleVersion = '1.13.406' }
-        @{ ModuleName = 'Az.Aks'; ModuleVersion = '6.1.1' }
-        @{ ModuleName = 'Az.Compute'; ModuleVersion = '9.3.0' }
-        @{ ModuleName = 'Az.PostgreSql'; ModuleVersion = '1.2.0' }
+        @{ ModuleName = 'PSFramework'   ; ModuleVersion = '1.13.426' }
+        @{ ModuleName = 'Az.Aks'; ModuleVersion = '7.1.1' }
+        @{ ModuleName = 'Az.Compute'; ModuleVersion = '11.4.0' }
+        @{ ModuleName = 'Az.PostgreSql'; ModuleVersion = '1.4.0' }
         @{ ModuleName = 'Az.RedisCache'; ModuleVersion = '1.11.0' }
-        @{ ModuleName = 'Az.Resources'; ModuleVersion = '7.11.0' }
+        @{ ModuleName = 'Az.Resources'; ModuleVersion = '9.0.3' }
     )
 
     # Assemblies that must be loaded prior to importing this module
@@ -51,6 +51,7 @@
         'Get-AzureFailureStep'
         'Get-AzureFailureTrace'
         'Import-AzureFailureExperiment'
+        'Import-AzureFailureState'
         'Invoke-AzureFailureAKSShutdown'
         'Invoke-AzureFailureCacheForRedisReboot'
         'Invoke-AzureFailureDelay'
@@ -68,6 +69,7 @@
         'Restore-AzureFailureVMScaleSetShutdown'
         'Restore-AzureFailureVMShutdown'
         'Restore-AzureFailureWaitForInput'
+        'Save-AzureFailureState'
     )
 
     # Cmdlets to export from this module
